@@ -2,10 +2,16 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/lib/pusher';
 import type { Player, GameRoom, DISCONNECT_TIMEOUT, FLIP_COOLDOWN } from '@/types/game';
 
-// In-memory storage (in production, you'd want to use a database)
-const players = new Map<string, Player>();
-const games = new Map<string, GameRoom>();
-const waitingPlayers: string[] = [];
+// In-memory storage
+declare global {
+  var players: Map<string, Player>;
+  var games: Map<string, GameRoom>;
+  var waitingPlayers: string[];
+}
+
+global.players = global.players || new Map();
+global.games = global.games || new Map();
+global.waitingPlayers = global.waitingPlayers || [];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { action } = req.query;
@@ -72,8 +78,20 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Already waiting for match' });
   }
 
+  const player = players.get(playerId);
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
   if (waitingPlayers.length > 0) {
     const opponent = waitingPlayers.shift()!;
+    const opponentPlayer = players.get(opponent);
+    
+    // Check if opponent still exists
+    if (!opponentPlayer) {
+      waitingPlayers.push(playerId);
+      return res.status(200).json({ waiting: true });
+    }
     
     // Create new game
     const gameRoom: GameRoom = {
@@ -81,14 +99,13 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       players: [playerId, opponent],
       currentTurn: playerId,
       betAmount: 0,
-      status: 'betting'
+      status: 'betting',
+      lastAction: Date.now()
     };
 
     games.set(gameRoom.id, gameRoom);
 
     // Update player statuses
-    const player = players.get(playerId)!;
-    const opponentPlayer = players.get(opponent)!;
     player.status = 'playing';
     opponentPlayer.status = 'playing';
 

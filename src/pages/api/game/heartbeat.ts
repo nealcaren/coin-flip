@@ -40,3 +40,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Return current player state
   res.status(200).json(player);
 }
+import { NextApiRequest, NextApiResponse } from 'next';
+import { pusherServer } from '@/lib/pusher';
+import type { Player } from '@/types/game';
+
+// Share the same in-memory storage from [action].ts
+declare global {
+  var players: Map<string, Player>;
+  var games: Map<string, GameRoom>;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { playerId } = req.body;
+  const now = Date.now();
+
+  const player = global.players?.get(playerId);
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  // Update last active timestamp
+  player.lastActive = now;
+  
+  res.status(200).json({ success: true });
+}
