@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
 import toast from 'react-hot-toast';
 import type { Player, GameRoom, FLIP_COOLDOWN } from '@/types/game';
+import { CoinFlip } from '@/components/CoinFlip';
 
 interface GameRoomProps {
   gameRoom: GameRoom;
@@ -14,6 +15,7 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [opponentCoins, setOpponentCoins] = useState<number>(5);
+  const [flipResult, setFlipResult] = useState<'heads' | 'tails' | undefined>();
   
   const isMyTurn = gameRoom.currentTurn === player.id;
   const opponent = gameRoom.players.find(id => id !== player.id)!;
@@ -33,6 +35,8 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       gameStatus: string;
       nextTurn: string;
     }) => {
+      setFlipResult(data.result);
+      
       // Update coins and show result toast
       if (data.result === 'heads') {
         toast.success('Heads! Winner!');
@@ -46,6 +50,11 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
         toast.success('Game Over!');
         onGameEnd?.();
       }
+
+      // Clear flip result after animation
+      setTimeout(() => {
+        setFlipResult(undefined);
+      }, 1500);
     });
 
     channel.bind('game-timeout', (data: { winner: string }) => {
@@ -151,17 +160,22 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       )}
 
       {isMyTurn && gameRoom.status === 'flipping' && (
-        <button
-          onClick={handleFlip}
-          disabled={isOnCooldown}
-          className={`w-full ${
-            isOnCooldown ? 'bg-gray-400' : 'bg-green-500'
-          } text-white px-4 py-2 rounded`}
-        >
-          {isOnCooldown 
-            ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s` 
-            : 'Flip Coin'}
-        </button>
+        <div className="text-center">
+          {flipResult && <CoinFlip result={flipResult} />}
+          <button
+            onClick={handleFlip}
+            disabled={isOnCooldown || flipResult !== undefined}
+            className={`w-full ${
+              isOnCooldown || flipResult !== undefined ? 'bg-gray-400' : 'bg-green-500'
+            } text-white px-4 py-2 rounded mt-4`}
+          >
+            {isOnCooldown 
+              ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s`
+              : flipResult
+              ? `Result: ${flipResult.toUpperCase()}`
+              : 'Flip Coin'}
+          </button>
+        </div>
       )}
     </div>
   );
