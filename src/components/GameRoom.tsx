@@ -16,6 +16,8 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [opponentCoins, setOpponentCoins] = useState<number>(5);
   const [flipResult, setFlipResult] = useState<'heads' | 'tails' | undefined>();
+  const [isPlacingBet, setIsPlacingBet] = useState(false);
+  const [isFlipping, setIsFlipping] = useState(false);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
   const opponent = gameRoom.players.find(id => id !== player.id)!;
@@ -69,8 +71,9 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   }, [gameRoom.id, onGameEnd]);
 
   const handleBet = async () => {
-    if (!isMyTurn || gameRoom.status !== 'betting') return;
+    if (!isMyTurn || gameRoom.status !== 'betting' || isPlacingBet) return;
 
+    setIsPlacingBet(true);
     try {
       await fetch('/api/game/bet', {
         method: 'POST',
@@ -83,12 +86,16 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       });
     } catch (error) {
       console.error('Failed to place bet:', error);
+      toast.error('Failed to place bet');
+    } finally {
+      setIsPlacingBet(false);
     }
   };
 
   const handleFlip = async () => {
-    if (!isMyTurn || gameRoom.status !== 'flipping') return;
+    if (!isMyTurn || gameRoom.status !== 'flipping' || isFlipping) return;
 
+    setIsFlipping(true);
     try {
       const response = await fetch('/api/game/flip', {
         method: 'POST',
@@ -118,6 +125,9 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       }
     } catch (error) {
       console.error('Failed to flip coin:', error);
+      toast.error('Failed to flip coin');
+    } finally {
+      setIsFlipping(false);
     }
   };
 
@@ -152,9 +162,12 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
           />
           <button
             onClick={handleBet}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            disabled={isPlacingBet}
+            className={`bg-blue-500 text-white px-4 py-2 rounded ${
+              isPlacingBet ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            Place Bet
+            {isPlacingBet ? 'Placing Bet...' : 'Place Bet'}
           </button>
         </div>
       )}
@@ -164,13 +177,17 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
           {flipResult && <CoinFlip result={flipResult} />}
           <button
             onClick={handleFlip}
-            disabled={isOnCooldown || flipResult !== undefined}
+            disabled={isOnCooldown || flipResult !== undefined || isFlipping}
             className={`w-full ${
-              isOnCooldown || flipResult !== undefined ? 'bg-gray-400' : 'bg-green-500'
+              isOnCooldown || flipResult !== undefined || isFlipping 
+                ? 'bg-gray-400' 
+                : 'bg-green-500'
             } text-white px-4 py-2 rounded mt-4`}
           >
             {isOnCooldown 
               ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s`
+              : isFlipping
+              ? 'Flipping...'
               : flipResult
               ? `Result: ${flipResult.toUpperCase()}`
               : 'Flip Coin'}

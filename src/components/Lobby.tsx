@@ -9,10 +9,15 @@ interface LobbyProps {
 
 export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Subscribe to lobby channel
     const channel = pusherClient.subscribe('presence-lobby');
+
+    channel.bind('pusher:subscription_succeeded', () => {
+      setIsLoading(false);
+    });
 
     channel.bind('game-created', (gameRoom: any) => {
       if (gameRoom.players.includes(player.id)) {
@@ -40,6 +45,17 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       setIsSearching(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md">
+        <h2 className="text-xl font-bold mb-4">Game Lobby</h2>
+        <div className="flex justify-center items-center h-32">
+          <p className="text-gray-500">Connecting to lobby...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md">
