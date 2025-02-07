@@ -1,47 +1,120 @@
-# Project Name
+# Classroom Coin Flip
 
-A brief description of what this project does and who it's for.
+A real-time multiplayer coin-flipping game for classrooms where students compete using virtual coins. Each student starts with 5 coins and can challenge others to coin-flip battles.
 
 ## Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- 🎮 Player Features
+  - Automatic 5-coin balance for new users
+  - Real-time coin balance tracking
+  - Simple login with student ID
+  - Status tracking (in lobby/in game)
+
+- 🎲 Game Features
+  - Random matchmaking with other online players
+  - Turn-based coin flipping
+  - Player-chosen bet amounts
+  - Heads wins, tails loses
+  - Automatic return to lobby when out of coins
+
+- 🏠 Room System
+  - Main lobby for available players
+  - Private game rooms for matched pairs
+  - Real-time game state updates
+
+## Technical Stack
+
+- **Frontend**: Next.js with TypeScript
+- **Backend**: Firebase (Authentication, Firestore)
+- **Hosting**: Vercel
+- **Version Control**: GitHub
 
 ## Installation
 
 ```bash
-pip install project-name
+# Clone the repository
+git clone [repository-url]
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Run the development server
+npm run dev
 ```
 
-## Usage
+## Environment Setup
 
-```python
-import project
+Create a `.env.local` file with the following:
 
-# Basic example
-project.do_something()
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
 
-## API Reference
+## Project Structure
 
-### Function/Class Name
-
-```python
-function_name(param1, param2)
+```
+coin-flip-game/
+├── src/
+│   ├── components/    # React components
+│   ├── lib/          # Firebase and game logic
+│   ├── pages/        # Next.js pages
+│   └── types/        # TypeScript definitions
 ```
 
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `param1` | `string` | Description of param1 |
-| `param2` | `int` | Description of param2 |
+## Game Rules
+
+1. Each new player starts with 5 coins
+2. Players enter the gaming room for matchmaking
+3. When matched, players take turns:
+   - Active player chooses bet amount
+   - Active player flips coin
+   - Heads: Active player wins bet amount
+   - Tails: Active player loses bet amount
+4. Game ends when a player runs out of coins
+5. Players can start new games from lobby
+
+## Development Status
+
+- [ ] Phase 1: Basic Setup
+  - [ ] Project initialization
+  - [ ] Firebase configuration
+  - [ ] Student authentication
+
+- [ ] Phase 2: Core Features
+  - [ ] User management
+  - [ ] Lobby system
+  - [ ] Matchmaking
+
+- [ ] Phase 3: Game Logic
+  - [ ] Coin flipping
+  - [ ] Betting system
+  - [ ] Win/lose conditions
+
+- [ ] Phase 4: Polish
+  - [ ] UI/UX improvements
+  - [ ] Error handling
+  - [ ] Performance optimization
 
 ## Contributing
 
-Contributions are always welcome!
+This is a classroom project. Contributing guidelines will be provided by the instructor.
 
-See `contributing.md` for ways to get started.
+## Deployment
+
+The application is deployed on Vercel and can be accessed at [your-app-url].
+
+## Support
+
+For support, please contact [instructor contact information].
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+This project is licensed under the MIT License - see the LICENSE file for details.
