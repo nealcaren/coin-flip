@@ -75,22 +75,26 @@ export default function Home() {
 
   if (gameState === 'login') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <form onSubmit={handleLogin} className="p-6 bg-white rounded shadow-md">
-          <h1 className="text-2xl mb-4">Classroom Coin Flip</h1>
-          <input
-            type="text"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            placeholder="Enter Student ID"
-            className="border p-2 mb-4 w-full"
-          />
-          <button 
-            type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded"
-          >
-            Join Game
-          </button>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-500 to-purple-600 p-4">
+        <form onSubmit={handleLogin} className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl">
+          <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+            Classroom Coin Flip
+          </h1>
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              placeholder="Enter Student ID"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              type="submit"
+              className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+            >
+              Join Game
+            </button>
+          </div>
         </form>
       </div>
     );
@@ -98,19 +102,29 @@ export default function Home() {
 
   if (gameState === 'lobby') {
     return (
-      <div className="min-h-screen p-6">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-2xl mb-4">Game Lobby</h1>
-          <div className="bg-white rounded shadow-md p-4 mb-4">
-            <p>Student ID: {player?.id}</p>
-            <p>Coins: {player?.coins}</p>
+      <div className="min-h-screen bg-gradient-to-b from-blue-500 to-purple-600 p-4">
+        <div className="max-w-md mx-auto pt-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-4">
+            <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">Game Lobby</h1>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">Student ID</p>
+                  <p className="font-semibold text-gray-800">{player?.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Coins</p>
+                  <p className="font-semibold text-gray-800">{player?.coins}</p>
+                </div>
+              </div>
+              <button 
+                onClick={findMatch}
+                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
+              >
+                Find Match
+              </button>
+            </div>
           </div>
-          <button 
-            onClick={findMatch}
-            className="w-full bg-green-500 text-white p-2 rounded"
-          >
-            Find Match
-          </button>
         </div>
       </div>
     );
