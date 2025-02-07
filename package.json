@@ -1,0 +1,26 @@
+{
+  "name": "coin-flip",
+  "version": "1.0.0",
+  "description": "A real-time multiplayer coin-flipping game for classrooms where students compete using virtual coins. Each student starts with 5 coins and can challenge others to coin-flip battles.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.0.8",
+    "autoprefixer": "^10.4.20",
+    "next": "^15.1.6",
+    "postcss": "^8.5.1",
+    "pusher": "^5.2.0",
+    "pusher-js": "^8.4.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.1",
+    "tailwindcss": "^4.0.4",
+    "typescript": "^5.7.3"
+  }
+}
