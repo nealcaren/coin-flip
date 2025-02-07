@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
 import type { Player, GameRoom } from '@/types/game';
+import { useHeartbeat } from '@/hooks/useHeartbeat';
 
 export default function Home() {
   const [studentId, setStudentId] = useState('');
   const [gameState, setGameState] = useState<'login' | 'lobby' | 'playing'>('login');
   const [player, setPlayer] = useState<Player | null>(null);
   const [currentGame, setCurrentGame] = useState<GameRoom | null>(null);
+
+  useHeartbeat(player?.id ?? null);
 
   useEffect(() => {
     if (player) {
