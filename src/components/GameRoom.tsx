@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
+import toast from 'react-hot-toast';
 import type { Player, GameRoom, FLIP_COOLDOWN } from '@/types/game';
 
 interface GameRoomProps {
@@ -12,6 +13,7 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   const [betAmount, setBetAmount] = useState(1);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [opponentCoins, setOpponentCoins] = useState<number>(5);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
   const opponent = gameRoom.players.find(id => id !== player.id)!;
@@ -31,12 +33,23 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       gameStatus: string;
       nextTurn: string;
     }) => {
+      // Update coins and show result toast
+      if (data.result === 'heads') {
+        toast.success('Heads! Winner!');
+      } else {
+        toast.error('Tails! Better luck next time!');
+      }
+      
+      setOpponentCoins(data.opponentCoins);
+      
       if (data.gameStatus === 'complete') {
+        toast.success('Game Over!');
         onGameEnd?.();
       }
     });
 
     channel.bind('game-timeout', (data: { winner: string }) => {
+      toast.error('Game ended due to timeout');
       onGameEnd?.();
     });
 
@@ -104,8 +117,16 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       <h2 className="text-xl font-bold mb-4">Game Room</h2>
       
       <div className="mb-4">
-        <p>Your Coins: {player.coins}</p>
-        <p>Opponent ID: {opponent}</p>
+        <div className="flex justify-between mb-4">
+          <div>
+            <p className="font-bold">You</p>
+            <p>Coins: {player.coins}</p>
+          </div>
+          <div>
+            <p className="font-bold">Opponent</p>
+            <p>Coins: {opponentCoins}</p>
+          </div>
+        </div>
         <p>Current Turn: {isMyTurn ? 'Your Turn' : 'Opponent\'s Turn'}</p>
         <p>Status: {gameRoom.status}</p>
       </div>
