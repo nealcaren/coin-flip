@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/lib/pusher';
-import type { Player, GameRoom } from '@/types/game';
+import type { Player, GameRoom, DISCONNECT_TIMEOUT, FLIP_COOLDOWN } from '@/types/game';
 
 // In-memory storage (in production, you'd want to use a database)
 const players = new Map<string, Player>();
@@ -22,6 +22,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     default:
       return res.status(400).json({ error: 'Invalid action' });
   }
+}
+
+function checkGameTimeout(game: GameRoom): boolean {
+  const now = Date.now();
+  if (now - game.lastAction > DISCONNECT_TIMEOUT) {
+    // Handle timeout
+    const currentPlayer = players.get(game.currentTurn)!;
+    const opponentId = game.players.find(id => id !== game.currentTurn)!;
+    const opponent = players.get(opponentId)!;
+    
+    // Current player forfeits
+    currentPlayer.status = 'lobby';
+    opponent.status = 'lobby';
+    games.delete(game.id);
+    
+    // Notify players
+    pusherServer.trigger(`game-${game.id}`, 'game-timeout', {
+      winner: opponentId
+    });
+    
+    return true;
+  }
+  return false;
 }
 
 async function handleLogin(req: NextApiRequest, res: NextApiResponse) {
@@ -81,12 +104,17 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
 
 async function handleBet(req: NextApiRequest, res: NextApiResponse) {
   const { gameId, playerId, amount } = req.body;
+  const now = Date.now();
   const game = games.get(gameId);
+  const player = players.get(playerId)!;
 
   if (!game || game.currentTurn !== playerId || game.status !== 'betting') {
     return res.status(400).json({ error: 'Invalid bet' });
   }
 
+  // Update last action timestamp
+  game.lastAction = now;
+  
   game.betAmount = amount;
   game.status = 'flipping';
 
@@ -97,14 +125,27 @@ async function handleBet(req: NextApiRequest, res: NextApiResponse) {
 
 async function handleFlip(req: NextApiRequest, res: NextApiResponse) {
   const { gameId, playerId } = req.body;
+  const now = Date.now();
   const game = games.get(gameId);
+  const player = players.get(playerId)!;
+
+  // Check cooldown
+  if (now - player.lastFlip < FLIP_COOLDOWN) {
+    return res.status(429).json({ 
+      error: 'Cooldown active',
+      remainingTime: FLIP_COOLDOWN - (now - player.lastFlip)
+    });
+  }
 
   if (!game || game.currentTurn !== playerId || game.status !== 'flipping') {
     return res.status(400).json({ error: 'Invalid flip' });
   }
 
+  // Update last flip timestamp
+  player.lastFlip = now;
+  game.lastAction = now;
+
   const result = Math.random() < 0.5 ? 'heads' : 'tails';
-  const player = players.get(playerId)!;
   const opponentId = game.players.find(id => id !== playerId)!;
   const opponent = players.get(opponentId)!;
 
