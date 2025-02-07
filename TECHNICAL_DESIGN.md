@@ -171,3 +171,53 @@ interface GameRoom {
    - Regular dependency updates
    - Performance optimization
    - Bug fixes
+
+## 11. Game Mechanics and Security
+
+### Timeout and Disconnection Handling
+1. Heartbeat System
+   - Client sends heartbeat every 10 seconds
+   - Server tracks `lastActive` timestamp
+   - Grace period of 30 seconds before forfeit
+   - Automatic game resolution on timeout
+
+2. Server-Side Game Logic
+   - All coin flips performed server-side
+   - Results broadcast via Pusher
+   - Prevents client manipulation
+   - Maintains game integrity
+
+3. Rate Limiting and Cooldowns
+   - 2-second cooldown between coin flips
+   - Server-side cooldown validation
+   - Prevents rapid-fire betting
+   - Cooldown status in player state
+
+4. Bankruptcy System
+   - Players eliminated at 0 coins
+   - No re-entry until new session
+   - Automatic removal from matchmaking
+   - Historical record maintained
+
+### Updated Data Models
+```typescript
+interface Player {
+  // Existing fields...
+  lastActive: number;      // Timestamp for timeout tracking
+  lastFlip: number;        // Timestamp for cooldown
+  disconnectedAt?: number; // Timestamp when disconnect detected
+}
+
+interface GameRoom {
+  // Existing fields...
+  graceEndTime?: number;   // When disconnect timeout expires
+  lastAction: number;      // Timestamp of last game action
+}
+```
+
+### System Constants
+```typescript
+const HEARTBEAT_INTERVAL = 10000;  // 10 seconds
+const DISCONNECT_TIMEOUT = 30000;  // 30 seconds
+const FLIP_COOLDOWN = 2000;       // 2 seconds
+```
