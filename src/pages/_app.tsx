@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
+import { Toaster } from 'react-hot-toast';
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -10,5 +11,10 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, []);
 
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Component {...pageProps} />
+      <Toaster position="top-right" />
+    </>
+  );
 }
