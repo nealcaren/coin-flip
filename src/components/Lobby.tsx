@@ -14,10 +14,25 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
 
   useEffect(() => {
     // Subscribe to lobby channel
-    const channel = pusherClient.subscribe('presence-lobby');
+    const channel = pusherClient.subscribe('presence-lobby') as any;
 
-    channel.bind('pusher:subscription_succeeded', () => {
+    channel.bind('pusher:subscription_succeeded', (members: any) => {
+      console.log('Successfully subscribed to presence-lobby', members);
       setIsLoading(false);
+    });
+
+    channel.bind('pusher:subscription_error', (error: any) => {
+      console.error('Failed to subscribe to presence-lobby:', error);
+      toast.error('Failed to connect to lobby');
+      setIsLoading(false);
+    });
+
+    channel.bind('pusher:member_added', (member: any) => {
+      console.log('Member added to lobby:', member);
+    });
+
+    channel.bind('pusher:member_removed', (member: any) => {
+      console.log('Member removed from lobby:', member);
     });
 
     channel.bind('game-created', (gameRoom: GameRoom) => {
