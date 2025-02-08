@@ -58,6 +58,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         setIsSearching(false);
         setPlayerStatus('waitingForBet');
         onMatchFound(gameRoom);
+        toast.success('Match found! Waiting for opponent to place bet...');
         
         // Show success toast
         toast.success('Match found! Starting game...');

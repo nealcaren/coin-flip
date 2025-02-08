@@ -33,6 +33,7 @@ export default function Home() {
           setCurrentGame(game);
           setGameState('waitingForBet');
           setCurrentGame(game);
+          toast.success('Waiting for opponent to place bet...');
           toast.success('Game starting!');
         }
       });
