@@ -11,7 +11,7 @@ interface LobbyProps {
 export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [state, setState] = useState(false); // Add state for forcing re-renders
+  const [playerStatus, setPlayerStatus] = useState(player.status);
 
   useEffect(() => {
     // Subscribe to lobby channel and private player channel
@@ -99,7 +99,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       } else if (data.waiting) {
         console.log('Server confirmed waiting state');
         setIsSearching(true);
-        setState(prev => !prev); // Force UI update
+        setPlayerStatus('waiting');
         toast.success('Waiting for opponent...', { 
           duration: 5000,
           id: 'waiting-toast'
@@ -134,8 +134,15 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       <div className="mb-4">
         <p>Student ID: {player.id}</p>
         <p>Coins: {player.coins}</p>
-        <p>Status: {player.status}</p>
+        <p>Status: {playerStatus}</p>
       </div>
+
+      {playerStatus === 'waiting' && (
+        <div className="text-center p-4 bg-yellow-50 rounded-lg mb-4">
+          <p className="text-yellow-600 font-medium">Actively searching for opponent...</p>
+          <p className="text-sm text-yellow-500 mt-1">Please wait</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {isSearching && (
