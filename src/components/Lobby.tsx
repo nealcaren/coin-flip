@@ -41,6 +41,20 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         console.log('Match found for player:', player.id);
         setIsSearching(false);
         onMatchFound(gameRoom);
+        
+        // Unsubscribe from lobby when match is found
+        channel.unbind_all();
+        pusherClient.unsubscribe('presence-lobby');
+      }
+    });
+
+    // Listen for waiting players
+    channel.bind('player-waiting', (data: { playerId: string }) => {
+      console.log('Player waiting:', data.playerId);
+      if (data.playerId !== player.id && !isSearching) {
+        // If we're not already searching, try to match with the waiting player
+        console.log('Attempting to match with waiting player:', data.playerId);
+        findMatch();
       }
     });
 
