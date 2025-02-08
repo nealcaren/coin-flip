@@ -169,6 +169,7 @@ export default function Home() {
   }
 
   if (gameState === 'playing' && currentGame && player) {
+    console.log("Current Game in index.tsx:", currentGame);
     return (
       <GameRoom 
         initialGameRoom={currentGame}

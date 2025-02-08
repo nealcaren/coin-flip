@@ -11,6 +11,7 @@ interface GameRoomProps {
 }
 
 export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoomProps) {
+  console.log("GameRoom initialGameRoom prop:", initialGameRoom);
   const [gameRoom, setGameRoom] = useState(initialGameRoom);
   const [betAmount, setBetAmount] = useState(1);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
@@ -21,6 +22,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [isFlipping, setIsFlipping] = useState(false);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
+  console.log("isMyTurn:", isMyTurn);
   const opponent = gameRoom.players[0] === player.id ? gameRoom.players[1] : gameRoom.players[0];
 
   useEffect(() => {
