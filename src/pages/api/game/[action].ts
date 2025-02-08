@@ -116,20 +116,22 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     // Notify both players through the lobby channel
     console.log('Triggering game-created event');
     try {
-      console.log('Sending game-created events to channels:', {
-        channels: [
-          'presence-lobby',
-          `private-player-${playerId}`,
-          `private-player-${opponent}`
-        ],
-        gameRoom
-      });
+      const gamePayload = {
+        ...gameRoom,
+        players: [playerId, opponent], // Ensure players array is properly set
+        currentTurn: playerId,
+        status: 'betting',
+        betAmount: 0,
+        lastAction: Date.now()
+      };
+      
+      console.log('Sending game-created events with payload:', gamePayload);
       
       // Send to both the lobby channel and individual player channels
       await Promise.all([
-        pusherServer.trigger('presence-lobby', 'game-created', gameRoom),
-        pusherServer.trigger(`private-player-${playerId}`, 'game-created', gameRoom),
-        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gameRoom)
+        pusherServer.trigger('presence-lobby', 'game-created', gamePayload),
+        pusherServer.trigger(`private-player-${playerId}`, 'game-created', gamePayload),
+        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gamePayload)
       ]);
       
       console.log('Successfully sent all game-created events');
