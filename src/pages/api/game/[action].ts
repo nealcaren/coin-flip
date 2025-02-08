@@ -107,8 +107,8 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
         waitingPlayers.push(playerId);
         return res.status(200).json({ waiting: true });
       }
-    
-    const gameId = `game-${Date.now()}`;
+      
+      const gameId = `game-${Date.now()}`;
     const gameRoom: GameRoom = {
       id: gameId,
       players: [playerId, opponent],
@@ -158,39 +158,39 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     }
 
     res.status(200).json(gameRoom);
-  } else {
-    console.log('No opponents available, adding to waiting list:', playerId);
-    waitingPlayers.push(playerId);
-    
-    // Update player status
-    player.status = 'waiting';
-    
-    // Notify lobby that a player is waiting
-    // Notify lobby that player is waiting
-    await pusherServer.trigger('presence-lobby', 'player-waiting', {
-      playerId,
-      timestamp: Date.now(),
-      status: 'waiting'
-    });
+    } else {
+      console.log('No opponents available, adding to waiting list:', playerId);
+      waitingPlayers.push(playerId);
+      
+      // Update player status
+      player.status = 'waiting';
+      
+      // Notify lobby that player is waiting
+      await pusherServer.trigger('presence-lobby', 'player-waiting', {
+        playerId,
+        timestamp: Date.now(),
+        status: 'waiting'
+      });
 
-    console.log('Player added to waiting list and notifications sent');
-    
+      console.log('Player added to waiting list and notifications sent');
+      
       res.status(200).json({ 
         waiting: true,
         status: 'waiting',
         message: 'Waiting for opponent'
       });
-    } catch (error) {
-      console.error('Error in match handling:', error);
-      // Cleanup on error
-      player.status = 'lobby';
-      players.set(playerId, player);
-      const index = waitingPlayers.indexOf(playerId);
-      if (index > -1) {
-        waitingPlayers.splice(index, 1);
-      }
-      return res.status(500).json({ error: 'Failed to process match request' });
     }
+  } catch (error) {
+    console.error('Error in match handling:', error);
+    // Cleanup on error
+    player.status = 'lobby';
+    players.set(playerId, player);
+    const index = waitingPlayers.indexOf(playerId);
+    if (index > -1) {
+      waitingPlayers.splice(index, 1);
+    }
+    return res.status(500).json({ error: 'Failed to process match request' });
+  }
 }
 
 async function handleBet(req: NextApiRequest, res: NextApiResponse) {
