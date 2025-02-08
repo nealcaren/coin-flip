@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/lib/pusher';
-import type { Player, GameRoom, DISCONNECT_TIMEOUT, FLIP_COOLDOWN } from '@/types/game';
+import type { Player, GameRoom } from '@/types/game';
+import { DISCONNECT_TIMEOUT, FLIP_COOLDOWN } from '@/types/game';
 
 // In-memory storage
 declare global {
