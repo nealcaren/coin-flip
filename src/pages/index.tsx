@@ -80,7 +80,13 @@ export default function Home() {
       const data = await response.json();
       console.log('Match response:', data);
       
-      if (!data.waiting) {
+      if (data.waiting) {
+        setGameState('lobby');
+        toast.loading('Searching for opponent...', {
+          id: 'waiting-toast',
+          duration: Infinity
+        });
+      } else {
         setCurrentGame(data);
         setGameState('playing');
       }
