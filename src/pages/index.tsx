@@ -31,10 +31,14 @@ export default function Home() {
         if (game.players.includes(player.id)) {
           console.log('Match found, transitioning to game state');
           setCurrentGame(game);
-          setGameState('waitingForBet');
+          if (game.status === 'flipping') {
+            setGameState('playing');
+            toast.success('Coin flip in progress!');
+          } else {
+            setGameState('waitingForBet');
+            toast.success('Waiting for opponent to place bet...');
+          }
           setCurrentGame(game);
-          toast.success('Waiting for opponent to place bet...');
-          toast.success('Game starting!');
         }
       });
 

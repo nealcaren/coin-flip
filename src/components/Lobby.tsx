@@ -56,23 +56,20 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       if (gameRoom.players.includes(player.id)) {
         console.log('Match found for player:', player.id, 'in game:', gameRoom.id);
         setIsSearching(false);
-        setPlayerStatus('waitingForBet');
+        if (gameRoom.status === 'flipping') {
+          setPlayerStatus('playing');
+          toast.success('Coin flip in progress!');
+        } else {
+          setPlayerStatus('waitingForBet');
+          toast.success('Match found! Waiting for opponent to place bet...');
+        }
         onMatchFound(gameRoom);
-        toast.success('Match found! Waiting for opponent to place bet...');
         
-        // Show success toast
-        toast.success('Match found! Starting game...');
-        
-        // Small delay to allow state updates before transitioning
-        setTimeout(() => {
-          onMatchFound(gameRoom);
-          
-          // Unsubscribe from channels when match is found
-          lobbyChannel.unbind_all();
-          playerChannel.unbind_all();
-          pusherClient.unsubscribe('presence-lobby');
-          pusherClient.unsubscribe(`private-player-${player.id}`);
-        }, 100);
+        // Unsubscribe from channels when match is found
+        lobbyChannel.unbind_all();
+        playerChannel.unbind_all();
+        pusherClient.unsubscribe('presence-lobby');
+        pusherClient.unsubscribe(`private-player-${player.id}`);
       }
     };
 
