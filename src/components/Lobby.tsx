@@ -19,9 +19,16 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
   }, [player.status]);
 
   useEffect(() => {
+    console.log('Setting up Pusher subscriptions for player:', player.id);
+    
     // Subscribe to lobby channel and private player channel
     const lobbyChannel = pusherClient.subscribe('presence-lobby') as any;
     const playerChannel = pusherClient.subscribe(`private-player-${player.id}`) as any;
+
+    const handleStatusUpdate = (data: { status: string }) => {
+      console.log('Status update received:', data);
+      setPlayerStatus(data.status);
+    };
 
     const handleGameCreated = (gameRoom: GameRoom) => {
       console.log('Game created event received:', gameRoom);
@@ -76,12 +83,13 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       console.log('Member removed from lobby:', member);
     });
 
-    // Listen for game creation on both channels
+    // Bind all event handlers
+    playerChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('game-created', handleGameCreated);
     playerChannel.bind('game-created', handleGameCreated);
-
+    
     // Listen for waiting players
-    lobbyChannel.bind('player-waiting', (data: { playerId: string }) => {
+    lobbyChannel.bind('player-waiting', (data: { playerId: string, status: string }) => {
       console.log('Player waiting:', data.playerId);
       if (data.playerId !== player.id && !isSearching) {
         // If we're not already searching, try to match with the waiting player

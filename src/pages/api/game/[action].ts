@@ -73,19 +73,29 @@ async function handleLogin(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
-  const { playerId } = req.body;
-  console.log('Match request received for player:', playerId);
-  
-  if (waitingPlayers.includes(playerId)) {
-    console.log('Player already waiting:', playerId);
-    return res.status(400).json({ error: 'Already waiting for match' });
-  }
+  try {
+    const { playerId } = req.body;
+    console.log('Match request received for player:', playerId);
+    
+    if (waitingPlayers.includes(playerId)) {
+      console.log('Player already waiting:', playerId);
+      return res.status(400).json({ error: 'Already waiting for match' });
+    }
 
-  const player = players.get(playerId);
-  if (!player) {
-    console.log('Player not found:', playerId);
-    return res.status(404).json({ error: 'Player not found' });
-  }
+    const player = players.get(playerId);
+    if (!player) {
+      console.log('Player not found:', playerId);
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    // Update player status to waiting immediately
+    player.status = 'waiting';
+    players.set(playerId, player);
+    
+    // Send status update to player
+    await pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
+      status: 'waiting'
+    });
 
   if (waitingPlayers.length > 0) {
     const opponent = waitingPlayers.shift()!;
@@ -156,27 +166,31 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     player.status = 'waiting';
     
     // Notify lobby that a player is waiting
-    try {
-      await Promise.all([
-        pusherServer.trigger('presence-lobby', 'player-waiting', {
-          playerId,
-          timestamp: Date.now(),
-          status: 'waiting'
-        }),
-        pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
-          status: 'waiting'
-        })
-      ]);
-    } catch (error) {
-      console.error('Failed to send waiting status:', error);
-      return res.status(500).json({ error: 'Failed to update status' });
-    }
+    // Notify lobby that player is waiting
+    await pusherServer.trigger('presence-lobby', 'player-waiting', {
+      playerId,
+      timestamp: Date.now(),
+      status: 'waiting'
+    });
+
+    console.log('Player added to waiting list and notifications sent');
     
     res.status(200).json({ 
       waiting: true,
       status: 'waiting',
       message: 'Waiting for opponent'
     });
+  } catch (error) {
+    console.error('Error in match handling:', error);
+    // Cleanup on error
+    player.status = 'lobby';
+    players.set(playerId, player);
+    const index = waitingPlayers.indexOf(playerId);
+    if (index > -1) {
+      waitingPlayers.splice(index, 1);
+    }
+    return res.status(500).json({ error: 'Failed to process match request' });
+  }
   }
 }
 
