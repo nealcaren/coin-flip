@@ -97,16 +97,16 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       status: 'waiting'
     });
 
-  if (waitingPlayers.length > 0) {
-    const opponent = waitingPlayers.shift()!;
-    console.log('Found opponent:', opponent);
-    const opponentPlayer = players.get(opponent);
-    
-    if (!opponentPlayer) {
-      console.log('Opponent not found, adding player to waiting list');
-      waitingPlayers.push(playerId);
-      return res.status(200).json({ waiting: true });
-    }
+    if (waitingPlayers.length > 0) {
+      const opponent = waitingPlayers.shift()!;
+      console.log('Found opponent:', opponent);
+      const opponentPlayer = players.get(opponent);
+      
+      if (!opponentPlayer) {
+        console.log('Opponent not found, adding player to waiting list');
+        waitingPlayers.push(playerId);
+        return res.status(200).json({ waiting: true });
+      }
     
     const gameId = `game-${Date.now()}`;
     const gameRoom: GameRoom = {
@@ -175,23 +175,22 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
 
     console.log('Player added to waiting list and notifications sent');
     
-    res.status(200).json({ 
-      waiting: true,
-      status: 'waiting',
-      message: 'Waiting for opponent'
-    });
-  } catch (error) {
-    console.error('Error in match handling:', error);
-    // Cleanup on error
-    player.status = 'lobby';
-    players.set(playerId, player);
-    const index = waitingPlayers.indexOf(playerId);
-    if (index > -1) {
-      waitingPlayers.splice(index, 1);
+      res.status(200).json({ 
+        waiting: true,
+        status: 'waiting',
+        message: 'Waiting for opponent'
+      });
+    } catch (error) {
+      console.error('Error in match handling:', error);
+      // Cleanup on error
+      player.status = 'lobby';
+      players.set(playerId, player);
+      const index = waitingPlayers.indexOf(playerId);
+      if (index > -1) {
+        waitingPlayers.splice(index, 1);
+      }
+      return res.status(500).json({ error: 'Failed to process match request' });
     }
-    return res.status(500).json({ error: 'Failed to process match request' });
-  }
-  }
 }
 
 async function handleBet(req: NextApiRequest, res: NextApiResponse) {
