@@ -75,9 +75,16 @@ export default function Home() {
       });
       
       const data = await response.json();
-      if (data.gameId) {
+      console.log('Match response:', data);
+      
+      // Check for both id and gameId for compatibility
+      if (data.id || data.gameId) {
         setCurrentGame(data);
         setGameState('playing');
+      } else if (data.waiting) {
+        toast.success('Waiting for opponent...');
+      } else if (data.error) {
+        toast.error(data.error);
       }
     } catch (error) {
       console.error('Matchmaking failed:', error);
