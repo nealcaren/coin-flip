@@ -146,11 +146,6 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
           id: 'waiting-toast',
           duration: Infinity
         });
-        // Show persistent toast while waiting
-        toast.loading('Searching for opponent...', {
-          id: 'waiting-toast',
-          duration: Infinity
-        });
       } else if (data.id) {
         // If we get a game room back, use it
         console.log('Game room received:', data);
