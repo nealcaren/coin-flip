@@ -94,14 +94,23 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     player.status = 'waiting';
     players.set(playerId, player);
     
-    // Send status update to player
+    // Send status updates
     try {
-      await pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
-        status: 'waiting'
-      });
-      console.log('Sent status update to player:', playerId);
+      await Promise.all([
+        // Send to player's private channel
+        pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
+          status: 'waiting'
+        }),
+        // Also broadcast to lobby
+        pusherServer.trigger('presence-lobby', 'status-update', {
+          playerId,
+          status: 'waiting'
+        })
+      ]);
+      console.log('Sent status updates for player:', playerId);
     } catch (error) {
-      console.error('Failed to send status update:', error);
+      console.error('Failed to send status updates:', error);
+      throw error; // Re-throw to be caught by outer try-catch
     }
 
     if (waitingPlayers.length > 0) {

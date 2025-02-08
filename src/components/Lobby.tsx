@@ -108,8 +108,10 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
 
   const findMatch = async () => {
     console.log('findMatch called, current status:', playerStatus);
+    // Immediately show searching state
     setIsSearching(true);
     setPlayerStatus('searching');
+    toast.loading('Initiating match search...', { id: 'search-toast' });
     try {
       console.log('Attempting to find match for player:', player.id);
       const response = await fetch('/api/game/match', {
@@ -168,7 +170,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       </div>
 
       {(isSearching || ['searching', 'waiting'].includes(playerStatus)) && (
-        <div className="text-center p-4 bg-blue-50 rounded-lg mb-4">
+        <div className="text-center p-4 bg-blue-50 rounded-lg mb-4 animate-pulse">
           <div className="animate-pulse">
             <p className="text-blue-600 font-medium">Searching for opponent...</p>
             <p className="text-sm text-blue-500 mt-1">Please stay on this page</p>
