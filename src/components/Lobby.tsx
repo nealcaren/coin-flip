@@ -25,12 +25,17 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
 
     const handleGameCreated = (gameRoom: GameRoom) => {
       console.log('Game created event received:', gameRoom);
+      
+      // Clear any existing waiting toast
+      toast.dismiss('waiting-toast');
+      
       // Validate game room data
-      if (!gameRoom || !Array.isArray(gameRoom.players)) {
+      if (!gameRoom || !gameRoom.id || !Array.isArray(gameRoom.players)) {
         console.error('Invalid game room data received:', gameRoom);
         return;
       }
       
+      // Check if this player is part of the game
       if (gameRoom.players.includes(player.id)) {
         console.log('Match found for player:', player.id, 'in game:', gameRoom.id);
         setIsSearching(false);

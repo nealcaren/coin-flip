@@ -98,8 +98,9 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       return res.status(200).json({ waiting: true });
     }
     
+    const gameId = `game-${Date.now()}`;
     const gameRoom: GameRoom = {
-      id: `game-${Date.now()}`,
+      id: gameId,
       players: [playerId, opponent],
       currentTurn: playerId,
       betAmount: 0,
@@ -116,22 +117,13 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     // Notify both players through the lobby channel
     console.log('Triggering game-created event');
     try {
-      const gamePayload = {
-        ...gameRoom,
-        players: [playerId, opponent], // Ensure players array is properly set
-        currentTurn: playerId,
-        status: 'betting',
-        betAmount: 0,
-        lastAction: Date.now()
-      };
-      
-      console.log('Sending game-created events with payload:', gamePayload);
+      console.log('Sending game-created events with payload:', gameRoom);
       
       // Send to both the lobby channel and individual player channels
       await Promise.all([
-        pusherServer.trigger('presence-lobby', 'game-created', gamePayload),
-        pusherServer.trigger(`private-player-${playerId}`, 'game-created', gamePayload),
-        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gamePayload)
+        pusherServer.trigger('presence-lobby', 'game-created', gameRoom),
+        pusherServer.trigger(`private-player-${playerId}`, 'game-created', gameRoom),
+        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gameRoom)
       ]);
       
       console.log('Successfully sent all game-created events');
