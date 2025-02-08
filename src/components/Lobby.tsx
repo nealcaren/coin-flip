@@ -35,13 +35,27 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const findMatch = async () => {
     setIsSearching(true);
     try {
-      await fetch('/api/game/match', {
+      console.log('Attempting to find match for player:', player.id);
+      const response = await fetch('/api/game/match', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playerId: player.id })
       });
+      
+      const data = await response.json();
+      console.log('Match response:', data);
+      
+      if (data.error) {
+        toast.error(data.error);
+        setIsSearching(false);
+      } else if (data.waiting) {
+        toast.success('Waiting for opponent...');
+      } else if (data.id) { // If we got a game room back
+        onMatchFound(data.id);
+      }
     } catch (error) {
       console.error('Failed to find match:', error);
+      toast.error('Failed to find match');
       setIsSearching(false);
     }
   };

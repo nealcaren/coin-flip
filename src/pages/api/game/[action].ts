@@ -73,27 +73,30 @@ async function handleLogin(req: NextApiRequest, res: NextApiResponse) {
 
 async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
   const { playerId } = req.body;
+  console.log('Match request received for player:', playerId);
   
   if (waitingPlayers.includes(playerId)) {
+    console.log('Player already waiting:', playerId);
     return res.status(400).json({ error: 'Already waiting for match' });
   }
 
   const player = players.get(playerId);
   if (!player) {
+    console.log('Player not found:', playerId);
     return res.status(404).json({ error: 'Player not found' });
   }
 
   if (waitingPlayers.length > 0) {
     const opponent = waitingPlayers.shift()!;
+    console.log('Found opponent:', opponent);
     const opponentPlayer = players.get(opponent);
     
-    // Check if opponent still exists
     if (!opponentPlayer) {
+      console.log('Opponent not found, adding player to waiting list');
       waitingPlayers.push(playerId);
       return res.status(200).json({ waiting: true });
     }
     
-    // Create new game
     const gameRoom: GameRoom = {
       id: `game-${Date.now()}`,
       players: [playerId, opponent],
@@ -103,17 +106,18 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       lastAction: Date.now()
     };
 
+    console.log('Creating game room:', gameRoom);
     games.set(gameRoom.id, gameRoom);
 
-    // Update player statuses
     player.status = 'playing';
     opponentPlayer.status = 'playing';
 
-    // Notify both players
+    console.log('Triggering game-created event');
     await pusherServer.trigger('presence-lobby', 'game-created', gameRoom);
 
     res.status(200).json(gameRoom);
   } else {
+    console.log('No opponents available, adding to waiting list:', playerId);
     waitingPlayers.push(playerId);
     res.status(200).json({ waiting: true });
   }

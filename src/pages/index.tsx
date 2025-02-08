@@ -13,6 +13,7 @@ export default function Home() {
 
   useEffect(() => {
     if (player) {
+      console.log('Setting up lobby channel for player:', player.id);
       // Subscribe to lobby channel
       const channel = pusherClient.subscribe('presence-lobby');
       
@@ -21,10 +22,20 @@ export default function Home() {
       });
 
       channel.bind('game-created', (game: GameRoom) => {
+        console.log('Game created event:', game);
+        console.log('Current player:', player.id);
+        console.log('Game players:', game.players);
+        
         if (game.players.includes(player.id)) {
+          console.log('Match found for current player');
           setCurrentGame(game);
           setGameState('playing');
         }
+      });
+
+      // Add error handling for channel subscription
+      channel.bind('pusher:subscription_error', (error: any) => {
+        console.error('Pusher subscription error:', error);
       });
 
       return () => {
