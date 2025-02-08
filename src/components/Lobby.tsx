@@ -96,6 +96,10 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       console.log('Bet placed event received:', data);
       if (currentGame && currentGame.id === data.gameId) {
         setPlayerStatus('flipping');
+        onMatchFound({
+          ...currentGame,
+          status: 'flipping',
+        });
         toast.success('Bet placed! Coin flip in progress...');
       }
     });

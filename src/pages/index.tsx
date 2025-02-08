@@ -45,6 +45,10 @@ export default function Home() {
       channel.bind('bet-placed', (data: { gameId: string, playerId: string, amount: number }) => {
         console.log('Bet placed event received:', data);
         if (currentGame && currentGame.id === data.gameId) {
+          setCurrentGame((prevGame) => ({
+            ...prevGame,
+            status: 'flipping',
+          }));
           setGameState('flipping');
           toast.success('Bet placed! Coin flip in progress...');
         }
