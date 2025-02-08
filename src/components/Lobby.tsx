@@ -13,29 +13,50 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Subscribe to lobby channel
-    const channel = pusherClient.subscribe('presence-lobby') as any;
+    // Subscribe to lobby channel and private player channel
+    const lobbyChannel = pusherClient.subscribe('presence-lobby') as any;
+    const playerChannel = pusherClient.subscribe(`private-player-${player.id}`) as any;
 
-    channel.bind('pusher:subscription_succeeded', (members: any) => {
+    const handleGameCreated = (gameRoom: GameRoom) => {
+      console.log('Game created event received:', gameRoom);
+      if (gameRoom.players.includes(player.id)) {
+        console.log('Match found for player:', player.id);
+        setIsSearching(false);
+        onMatchFound(gameRoom);
+        
+        // Unsubscribe from channels when match is found
+        lobbyChannel.unbind_all();
+        playerChannel.unbind_all();
+        pusherClient.unsubscribe('presence-lobby');
+        pusherClient.unsubscribe(`private-player-${player.id}`);
+      }
+    };
+
+    lobbyChannel.bind('pusher:subscription_succeeded', (members: any) => {
       console.log('Successfully subscribed to presence-lobby', members);
       setIsLoading(false);
     });
 
-    channel.bind('pusher:subscription_error', (error: any) => {
+    lobbyChannel.bind('pusher:subscription_error', (error: any) => {
       console.error('Failed to subscribe to presence-lobby:', error);
       toast.error('Failed to connect to lobby');
       setIsLoading(false);
     });
 
-    channel.bind('pusher:member_added', (member: any) => {
+    lobbyChannel.bind('pusher:member_added', (member: any) => {
       console.log('Member added to lobby:', member);
     });
 
-    channel.bind('pusher:member_removed', (member: any) => {
+    lobbyChannel.bind('pusher:member_removed', (member: any) => {
       console.log('Member removed from lobby:', member);
     });
 
-    channel.bind('game-created', (gameRoom: GameRoom) => {
+    // Listen for game creation on both channels
+    lobbyChannel.bind('game-created', handleGameCreated);
+    playerChannel.bind('game-created', handleGameCreated);
+
+    // Listen for waiting players
+    lobbyChannel.bind('player-waiting', (data: { playerId: string }) => {
       console.log('Game created event received:', gameRoom);
       if (gameRoom.players.includes(player.id)) {
         console.log('Match found for player:', player.id);
@@ -59,8 +80,10 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
     });
 
     return () => {
-      channel.unbind_all();
+      lobbyChannel.unbind_all();
+      playerChannel.unbind_all();
       pusherClient.unsubscribe('presence-lobby');
+      pusherClient.unsubscribe(`private-player-${player.id}`);
     };
   }, [player.id, onMatchFound]);
 
