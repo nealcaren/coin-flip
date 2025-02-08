@@ -11,6 +11,7 @@ interface LobbyProps {
 export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [state, setState] = useState(false); // Add state for forcing re-renders
 
   useEffect(() => {
     // Subscribe to lobby channel and private player channel
@@ -101,6 +102,9 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
           duration: 3000,
           id: 'waiting-toast' // Prevent duplicate toasts
         });
+        setIsSearching(true); // Ensure searching state is set
+        // Force a re-render of the waiting message
+        setState(prev => !prev);
       } else if (data.id) {
         // If we get a game room back, use it
         console.log('Game room received:', data);
