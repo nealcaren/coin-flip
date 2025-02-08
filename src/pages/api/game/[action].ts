@@ -149,13 +149,21 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     console.log('No opponents available, adding to waiting list:', playerId);
     waitingPlayers.push(playerId);
     
+    // Update player status
+    player.status = 'waiting';
+    
     // Notify lobby that a player is waiting
     await pusherServer.trigger('presence-lobby', 'player-waiting', {
       playerId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      status: 'waiting'
     });
     
-    res.status(200).json({ waiting: true });
+    res.status(200).json({ 
+      waiting: true,
+      status: 'waiting',
+      message: 'Waiting for opponent'
+    });
   }
 }
 

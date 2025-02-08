@@ -97,14 +97,13 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         toast.error(data.error);
         setIsSearching(false);
       } else if (data.waiting) {
-        // Keep searching state true and show toast
+        console.log('Server confirmed waiting state');
+        setIsSearching(true);
+        setState(prev => !prev); // Force UI update
         toast.success('Waiting for opponent...', { 
-          duration: 3000,
-          id: 'waiting-toast' // Prevent duplicate toasts
+          duration: 5000,
+          id: 'waiting-toast'
         });
-        setIsSearching(true); // Ensure searching state is set
-        // Force a re-render of the waiting message
-        setState(prev => !prev);
       } else if (data.id) {
         // If we get a game room back, use it
         console.log('Game room received:', data);
