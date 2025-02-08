@@ -235,7 +235,9 @@ async function handleBet(req: NextApiRequest, res: NextApiResponse) {
   game.status = 'flipping';
   game.lastAction = Date.now();
 
+  console.log('Game state before flip:', game);
   games.set(gameId, game);
+  console.log('Game state after flip:', game);
   console.log('Game before bet:', game);
   games.set(gameId, game);
   console.log('Game after bet:', game);
@@ -271,6 +273,7 @@ async function handleFlip(req: NextApiRequest, res: NextApiResponse) {
   player.lastFlip = now;
   game.lastAction = now;
 
+  console.log('Handling flip for game:', gameId);
   const result = Math.random() < 0.5 ? 'heads' : 'tails';
   const opponentId = game.players.find(id => id !== playerId)!;
   const opponent = players.get(opponentId)!;

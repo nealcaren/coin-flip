@@ -138,7 +138,10 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   };
 
   const handleFlip = async () => {
-    if (!isMyTurn || gameRoom.status !== 'flipping' || isFlipping) return;
+    if (!isMyTurn || gameRoom.status !== 'flipping' || isFlipping) {
+      console.log('Flip blocked:', { isMyTurn, status: gameRoom.status, isFlipping });
+      return;
+    }
 
     setIsFlipping(true);
     try {
