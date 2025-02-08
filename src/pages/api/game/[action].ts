@@ -236,7 +236,10 @@ async function handleBet(req: NextApiRequest, res: NextApiResponse) {
   game.lastAction = Date.now();
 
   games.set(gameId, game);
-  console.log('Broadcasting bet-placed event');
+  console.log('Game before bet:', game);
+  games.set(gameId, game);
+  console.log('Game after bet:', game);
+  console.log('About to trigger bet-placed event');
   await pusherServer.trigger(`private-game-${gameId}`, 'bet-placed', { 
     amount,
     playerId,
@@ -294,6 +297,7 @@ async function handleFlip(req: NextApiRequest, res: NextApiResponse) {
   }
 
   games.set(gameId, game);
+  console.log('About to trigger flip-result event');
   await pusherServer.trigger(`game-${gameId}`, 'flip-result', {
     result,
     playerCoins: player.coins,

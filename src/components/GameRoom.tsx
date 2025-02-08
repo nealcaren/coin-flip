@@ -38,8 +38,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     });
     
     channel.bind('bet-placed', (data: { amount: number, playerId: string }) => {
-      console.log('Bet placed:', data);
-      // Update game state for both players
+      console.log('bet-placed event received:', data);
       if (data.playerId !== player.id) {
         toast.info(`Opponent bet ${data.amount} coins`);
       }
@@ -48,6 +47,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
         status: 'flipping',
         betAmount: data.amount,
       }));
+      console.log('Updated gameRoom state:', gameRoom);
     });
 
     channel.bind('flip-result', (data: {
