@@ -25,9 +25,19 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
     const lobbyChannel = pusherClient.subscribe('presence-lobby') as any;
     const playerChannel = pusherClient.subscribe(`private-player-${player.id}`) as any;
 
-    const handleStatusUpdate = (data: { status: string }) => {
+    const handleStatusUpdate = (data: { status: string, playerId?: string }) => {
       console.log('Status update received:', data);
-      setPlayerStatus(data.status);
+      // Only update status if it's for this player or no playerId specified
+      if (!data.playerId || data.playerId === player.id) {
+        console.log('Updating player status to:', data.status);
+        setPlayerStatus(data.status);
+        if (data.status === 'waiting') {
+          toast.loading('Waiting for opponent...', {
+            id: 'waiting-toast',
+            duration: Infinity
+          });
+        }
+      }
     };
 
     const handleGameCreated = (gameRoom: GameRoom) => {
@@ -85,6 +95,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
 
     // Bind all event handlers
     playerChannel.bind('status-update', handleStatusUpdate);
+    lobbyChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('game-created', handleGameCreated);
     playerChannel.bind('game-created', handleGameCreated);
     
