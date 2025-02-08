@@ -20,7 +20,7 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   const [isFlipping, setIsFlipping] = useState(false);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
-  const opponent = gameRoom.players.find(id => id !== player.id)!;
+  const opponent = gameRoom.players[0] === player.id ? gameRoom.players[1] : gameRoom.players[0];
 
   useEffect(() => {
     console.log('Subscribing to game channel:', `private-game-${gameRoom.id}`);
