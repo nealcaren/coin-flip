@@ -128,22 +128,31 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         <p>Status: {player.status}</p>
       </div>
 
-      <button
-        onClick={findMatch}
-        disabled={isSearching}
-        className={`w-full ${
-          isSearching ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white px-4 py-2 rounded transition-colors`}
-      >
-        {isSearching ? (
-          <span className="flex items-center justify-center">
-            Finding Match...
-            <span className="ml-2">⌛</span>
-          </span>
-        ) : (
-          'Find Match'
+      <div className="space-y-4">
+        {isSearching && (
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <p className="text-blue-600 font-medium">Waiting for opponent...</p>
+            <p className="text-sm text-blue-500 mt-1">Stay on this page</p>
+          </div>
         )}
-      </button>
+        
+        <button
+          onClick={findMatch}
+          disabled={isSearching}
+          className={`w-full ${
+            isSearching ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
+          } text-white px-4 py-2 rounded transition-colors`}
+        >
+          {isSearching ? (
+            <span className="flex items-center justify-center">
+              Finding Match...
+              <span className="ml-2">⌛</span>
+            </span>
+          ) : (
+            'Find Match'
+          )}
+        </button>
+      </div>
     </div>
   );
 }
