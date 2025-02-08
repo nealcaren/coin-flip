@@ -102,6 +102,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         });
         toast.success('Bet placed! Coin flip in progress...');
       }
+      setIsSearching(false);
     });
     playerChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('status-update', handleStatusUpdate);

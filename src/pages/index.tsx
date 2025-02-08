@@ -49,7 +49,7 @@ export default function Home() {
             ...prevGame,
             status: 'flipping',
           }));
-          setGameState('flipping');
+          setGameState('playing');
           toast.success('Bet placed! Coin flip in progress...');
         }
       });
