@@ -132,80 +132,89 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md">
-      <h2 className="text-xl font-bold mb-4">Game Room</h2>
-      
-      <div className="mb-4">
-        <div className="flex justify-between mb-4">
-          <div>
-            <p className="font-bold">You</p>
-            <p>Coins: {player.coins}</p>
+    <div className="game-container p-4">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="card p-6">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Game Room</h2>
+          
+          <div className="mb-6">
+            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <p className="text-sm text-gray-500">You</p>
+                <p className="text-xl font-bold text-indigo-600">{player.coins} coins</p>
+              </div>
+              <div className="text-center p-3 bg-white rounded-lg shadow-sm">
+                <p className="text-sm text-gray-500">Opponent</p>
+                <p className="text-xl font-bold text-indigo-600">{opponentCoins} coins</p>
+              </div>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-sm text-gray-500">Current Turn</p>
+              <p className="font-semibold text-gray-800">
+                {isMyTurn ? 'Your Turn' : 'Opponent\'s Turn'}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold">Opponent</p>
-            <p>Coins: {opponentCoins}</p>
-          </div>
+
+          {isMyTurn && gameRoom.status === 'betting' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <div className="flex justify-between mb-2">
+                  <span className="text-gray-600">Bet Amount</span>
+                  <span className="font-bold text-indigo-600">{betAmount} coins</span>
+                </div>
+                <input
+                  type="range"
+                  min={1}
+                  max={player.coins}
+                  value={betAmount}
+                  onChange={(e) => setBetAmount(Number(e.target.value))}
+                  className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                />
+                <div className="flex justify-between text-sm text-gray-500 mt-1">
+                  <span>1</span>
+                  <span>{player.coins}</span>
+                </div>
+              </div>
+              <button
+                onClick={handleBet}
+                disabled={isPlacingBet}
+                className={`button-primary ${isPlacingBet && 'opacity-50 cursor-not-allowed'}`}
+              >
+                {isPlacingBet ? 'Placing Bet...' : `Bet ${betAmount} Coins`}
+              </button>
+            </div>
+          )}
+
+          {isMyTurn && gameRoom.status === 'flipping' && (
+            <div className="text-center space-y-4">
+              {flipResult && <CoinFlip result={flipResult} />}
+              <button
+                onClick={handleFlip}
+                disabled={isOnCooldown || flipResult !== undefined || isFlipping}
+                className={`button-secondary ${
+                  (isOnCooldown || flipResult !== undefined || isFlipping) && 
+                  'opacity-50 cursor-not-allowed'
+                }`}
+              >
+                {isOnCooldown 
+                  ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s`
+                  : isFlipping
+                  ? 'Flipping...'
+                  : flipResult
+                  ? `Result: ${flipResult.toUpperCase()}`
+                  : 'Flip Coin'}
+              </button>
+            </div>
+          )}
+
+          {!isMyTurn && (
+            <div className="text-center p-6 bg-gray-50 rounded-xl">
+              <p className="text-gray-500">Waiting for opponent...</p>
+            </div>
+          )}
         </div>
-        <p>Current Turn: {isMyTurn ? 'Your Turn' : 'Opponent\'s Turn'}</p>
-        <p>Status: {gameRoom.status}</p>
       </div>
-
-      {isMyTurn && gameRoom.status === 'betting' && (
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-          <div className="mb-4">
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Bet Amount:</span>
-              <span className="font-bold text-blue-600">{betAmount} coins</span>
-            </div>
-            <input
-              type="range"
-              min={1}
-              max={player.coins}
-              value={betAmount}
-              onChange={(e) => setBetAmount(Number(e.target.value))}
-              className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-sm text-gray-500 mt-1">
-              <span>1</span>
-              <span>{player.coins}</span>
-            </div>
-          </div>
-          <button
-            onClick={handleBet}
-            disabled={isPlacingBet}
-            className={`w-full ${
-              isPlacingBet 
-                ? 'bg-gray-400' 
-                : 'bg-blue-500 hover:bg-blue-600'
-            } text-white py-3 rounded-lg font-semibold transition-colors`}
-          >
-            {isPlacingBet ? 'Placing Bet...' : `Bet ${betAmount} Coins`}
-          </button>
-        </div>
-      )}
-
-      {isMyTurn && gameRoom.status === 'flipping' && (
-        <div className="text-center">
-          {flipResult && <CoinFlip result={flipResult} />}
-          <button
-            onClick={handleFlip}
-            disabled={isOnCooldown || flipResult !== undefined || isFlipping}
-            className={`w-full ${
-              isOnCooldown || flipResult !== undefined || isFlipping 
-                ? 'bg-gray-400' 
-                : 'bg-green-500'
-            } text-white px-4 py-2 rounded mt-4`}
-          >
-            {isOnCooldown 
-              ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s`
-              : isFlipping
-              ? 'Flipping...'
-              : flipResult
-              ? `Result: ${flipResult.toUpperCase()}`
-              : 'Flip Coin'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
