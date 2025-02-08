@@ -31,7 +31,7 @@ export default function Home() {
         if (game.players.includes(player.id)) {
           console.log('Match found, transitioning to game state');
           setCurrentGame(game);
-          setGameState('playing');
+          setGameState('waitingForBet');
           toast.success('Game starting!');
         }
       });

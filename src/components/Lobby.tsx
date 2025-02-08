@@ -56,7 +56,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       if (gameRoom.players.includes(player.id)) {
         console.log('Match found for player:', player.id, 'in game:', gameRoom.id);
         setIsSearching(false);
-        setPlayerStatus('playing');
+        setPlayerStatus('waitingForBet');
         
         // Show success toast
         toast.success('Match found! Starting game...');
