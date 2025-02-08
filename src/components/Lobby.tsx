@@ -49,9 +49,11 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         toast.error(data.error);
         setIsSearching(false);
       } else if (data.waiting) {
-        toast.success('Waiting for opponent...');
-      } else if (data.id) { // If we got a game room back
-        onMatchFound(data.id);
+        // Keep searching state true while waiting
+        toast.success('Waiting for opponent...', { duration: 3000 });
+      } else if (data.id) {
+        // Game found
+        onMatchFound(data);
       }
     } catch (error) {
       console.error('Failed to find match:', error);

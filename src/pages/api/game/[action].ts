@@ -112,6 +112,7 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     player.status = 'playing';
     opponentPlayer.status = 'playing';
 
+    // Notify both players through the lobby channel
     console.log('Triggering game-created event');
     await pusherServer.trigger('presence-lobby', 'game-created', gameRoom);
 

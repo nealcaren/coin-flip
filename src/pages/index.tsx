@@ -30,6 +30,7 @@ export default function Home() {
           console.log('Match found, transitioning to game state');
           setCurrentGame(game);
           setGameState('playing');
+          toast.success('Game starting!');
         }
       });
 
