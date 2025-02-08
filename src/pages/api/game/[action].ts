@@ -88,14 +88,21 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Player not found' });
     }
 
+    console.log('Current player status:', player.status);
+    
     // Update player status to waiting immediately
     player.status = 'waiting';
     players.set(playerId, player);
     
     // Send status update to player
-    await pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
-      status: 'waiting'
-    });
+    try {
+      await pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
+        status: 'waiting'
+      });
+      console.log('Sent status update to player:', playerId);
+    } catch (error) {
+      console.error('Failed to send status update:', error);
+    }
 
     if (waitingPlayers.length > 0) {
       const opponent = waitingPlayers.shift()!;

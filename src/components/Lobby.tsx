@@ -107,7 +107,9 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
   }, [player.id, onMatchFound]);
 
   const findMatch = async () => {
+    console.log('findMatch called, current status:', playerStatus);
     setIsSearching(true);
+    setPlayerStatus('searching');
     try {
       console.log('Attempting to find match for player:', player.id);
       const response = await fetch('/api/game/match', {
@@ -165,7 +167,7 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         <p>Status: {playerStatus}</p>
       </div>
 
-      {(isSearching || playerStatus === 'waiting') && (
+      {(isSearching || ['searching', 'waiting'].includes(playerStatus)) && (
         <div className="text-center p-4 bg-blue-50 rounded-lg mb-4">
           <div className="animate-pulse">
             <p className="text-blue-600 font-medium">Searching for opponent...</p>
