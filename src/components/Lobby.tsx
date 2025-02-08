@@ -4,7 +4,7 @@ import type { Player } from '@/types/game';
 
 interface LobbyProps {
   player: Player;
-  onMatchFound: (gameId: string) => void;
+  onMatchFound: (game: GameRoom) => void;
 }
 
 export default function Lobby({ player, onMatchFound }: LobbyProps) {
@@ -19,10 +19,12 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       setIsLoading(false);
     });
 
-    channel.bind('game-created', (gameRoom: any) => {
+    channel.bind('game-created', (gameRoom: GameRoom) => {
+      console.log('Game created event received:', gameRoom);
       if (gameRoom.players.includes(player.id)) {
+        console.log('Match found for player:', player.id);
         setIsSearching(false);
-        onMatchFound(gameRoom.id);
+        onMatchFound(gameRoom);
       }
     });
 
@@ -44,15 +46,14 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       
       const data = await response.json();
       console.log('Match response:', data);
-      
+    
       if (data.error) {
         toast.error(data.error);
         setIsSearching(false);
       } else if (data.waiting) {
-        // Keep searching state true while waiting
         toast.success('Waiting for opponent...', { duration: 3000 });
-      } else if (data.id) {
-        // Game found
+      } else {
+        // If we get a game room back, use it
         onMatchFound(data);
       }
     } catch (error) {
