@@ -51,26 +51,37 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       gameStatus: string;
       nextTurn: string;
     }) => {
+      console.log('Flip result received:', data);
       setFlipResult(data.result);
       
-      // Update coins and show result toast
-      if (data.result === 'heads') {
-        toast.success('Heads! Winner!');
-      } else {
-        toast.error('Tails! Better luck next time!');
-      }
-      
+      // Update player coins and game state
+      player.coins = data.playerCoins;
       setOpponentCoins(data.opponentCoins);
+      gameRoom.status = data.gameStatus;
+      gameRoom.currentTurn = data.nextTurn;
+      
+      // Show result toast
+      if (data.result === 'heads') {
+        toast.success(`Heads! ${data.nextTurn === player.id ? 'Your turn!' : 'Opponent\'s turn!'}`);
+      } else {
+        toast.error(`Tails! ${data.nextTurn === player.id ? 'Your turn!' : 'Opponent\'s turn!'}`);
+      }
       
       if (data.gameStatus === 'complete') {
         toast.success('Game Over!');
-        onGameEnd?.();
+        setTimeout(() => {
+          onGameEnd?.();
+        }, 2000);
+      } else {
+        // Clear flip result after animation
+        setTimeout(() => {
+          setFlipResult(undefined);
+          // Reset bet amount for next round if game continues
+          if (data.gameStatus === 'betting') {
+            gameRoom.betAmount = 0;
+          }
+        }, 1500);
       }
-
-      // Clear flip result after animation
-      setTimeout(() => {
-        setFlipResult(undefined);
-      }, 1500);
     });
 
     channel.bind('game-timeout', (data: { winner: string }) => {
