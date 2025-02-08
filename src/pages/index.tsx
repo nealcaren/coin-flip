@@ -3,6 +3,7 @@ import { pusherClient } from '@/lib/pusher';
 import type { Player, GameRoom } from '@/types/game';
 import { useHeartbeat } from '@/hooks/useHeartbeat';
 import GameRoom from '@/components/GameRoom';
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const [studentId, setStudentId] = useState('');

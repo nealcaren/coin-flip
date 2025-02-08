@@ -23,11 +23,21 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   const opponent = gameRoom.players.find(id => id !== player.id)!;
 
   useEffect(() => {
-    // Subscribe to game events
+    console.log('Subscribing to game channel:', `private-game-${gameRoom.id}`);
     const channel = pusherClient.subscribe(`private-game-${gameRoom.id}`);
+    
+    channel.bind('pusher:subscription_succeeded', () => {
+      console.log('Successfully subscribed to game channel');
+    });
+
+    channel.bind('pusher:subscription_error', (error: any) => {
+      console.error('Failed to subscribe to game channel:', error);
+    });
     
     channel.bind('bet-placed', (data: { amount: number }) => {
       console.log('Bet placed:', data.amount);
+      gameRoom.status = 'flipping';
+      gameRoom.betAmount = data.amount;
     });
 
     channel.bind('flip-result', (data: {
@@ -71,11 +81,16 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
   }, [gameRoom.id, onGameEnd]);
 
   const handleBet = async () => {
-    if (!isMyTurn || gameRoom.status !== 'betting' || isPlacingBet) return;
+    if (!isMyTurn || gameRoom.status !== 'betting' || isPlacingBet) {
+      console.log('Bet blocked:', { isMyTurn, status: gameRoom.status, isPlacingBet });
+      return;
+    }
 
+    console.log('Placing bet:', { amount: betAmount, gameId: gameRoom.id, playerId: player.id });
     setIsPlacingBet(true);
+    
     try {
-      await fetch('/api/game/bet', {
+      const response = await fetch('/api/game/bet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,6 +99,15 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
           amount: betAmount
         })
       });
+
+      const data = await response.json();
+      console.log('Bet response:', data);
+
+      if (data.error) {
+        toast.error(data.error);
+      } else {
+        toast.success(`Bet placed: ${betAmount} coins`);
+      }
     } catch (error) {
       console.error('Failed to place bet:', error);
       toast.error('Failed to place bet');

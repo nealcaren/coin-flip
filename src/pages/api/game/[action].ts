@@ -126,21 +126,36 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
 
 async function handleBet(req: NextApiRequest, res: NextApiResponse) {
   const { gameId, playerId, amount } = req.body;
-  const now = Date.now();
+  console.log('Handling bet:', { gameId, playerId, amount });
+  
   const game = games.get(gameId);
-  const player = players.get(playerId)!;
+  const player = players.get(playerId);
 
-  if (!game || game.currentTurn !== playerId || game.status !== 'betting') {
+  if (!game || !player) {
+    console.log('Game or player not found:', { gameFound: !!game, playerFound: !!player });
+    return res.status(404).json({ error: 'Game or player not found' });
+  }
+
+  if (game.currentTurn !== playerId || game.status !== 'betting') {
+    console.log('Invalid bet:', { currentTurn: game.currentTurn, status: game.status });
     return res.status(400).json({ error: 'Invalid bet' });
   }
 
-  // Update last action timestamp
-  game.lastAction = now;
-  
+  if (amount > player.coins) {
+    return res.status(400).json({ error: 'Not enough coins' });
+  }
+
+  // Update game state
   game.betAmount = amount;
   game.status = 'flipping';
+  game.lastAction = Date.now();
 
-  await pusherServer.trigger(`game-${gameId}`, 'bet-placed', { amount });
+  console.log('Broadcasting bet-placed event');
+  await pusherServer.trigger(`private-game-${gameId}`, 'bet-placed', { 
+    amount,
+    playerId,
+    gameStatus: game.status
+  });
   
   res.status(200).json({ success: true });
 }
