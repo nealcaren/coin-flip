@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
 import type { Player, GameRoom } from '@/types/game';
 import { useHeartbeat } from '@/hooks/useHeartbeat';
+import GameRoom from '@/components/GameRoom';
 
 export default function Home() {
   const [studentId, setStudentId] = useState('');
@@ -149,18 +150,16 @@ export default function Home() {
     );
   }
 
-  if (gameState === 'playing' && currentGame) {
+  if (gameState === 'playing' && currentGame && player) {
     return (
-      <div className="min-h-screen p-6">
-        <div className="max-w-md mx-auto">
-          <h1 className="text-2xl mb-4">Game Room</h1>
-          <div className="bg-white rounded shadow-md p-4">
-            <p>Game ID: {currentGame.id}</p>
-            <p>Current Turn: {currentGame.currentTurn}</p>
-            <p>Bet Amount: {currentGame.betAmount}</p>
-          </div>
-        </div>
-      </div>
+      <GameRoom 
+        gameRoom={currentGame}
+        player={player}
+        onGameEnd={() => {
+          setGameState('lobby');
+          setCurrentGame(null);
+        }}
+      />
     );
   }
 
