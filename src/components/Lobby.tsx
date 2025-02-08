@@ -39,13 +39,21 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       if (gameRoom.players.includes(player.id)) {
         console.log('Match found for player:', player.id, 'in game:', gameRoom.id);
         setIsSearching(false);
-        onMatchFound(gameRoom);
+        setPlayerStatus('playing');
         
-        // Unsubscribe from channels when match is found
-        lobbyChannel.unbind_all();
-        playerChannel.unbind_all();
-        pusherClient.unsubscribe('presence-lobby');
-        pusherClient.unsubscribe(`private-player-${player.id}`);
+        // Show success toast
+        toast.success('Match found! Starting game...');
+        
+        // Small delay to allow state updates before transitioning
+        setTimeout(() => {
+          onMatchFound(gameRoom);
+          
+          // Unsubscribe from channels when match is found
+          lobbyChannel.unbind_all();
+          playerChannel.unbind_all();
+          pusherClient.unsubscribe('presence-lobby');
+          pusherClient.unsubscribe(`private-player-${player.id}`);
+        }, 100);
       }
     };
 

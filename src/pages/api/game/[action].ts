@@ -119,14 +119,25 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     try {
       console.log('Sending game-created events with payload:', gameRoom);
       
+      // Update player statuses first
+      player.status = 'playing';
+      opponentPlayer.status = 'playing';
+      players.set(playerId, player);
+      players.set(opponent, opponentPlayer);
+      
       // Send to both the lobby channel and individual player channels
       await Promise.all([
+        // Send game creation events
         pusherServer.trigger('presence-lobby', 'game-created', gameRoom),
         pusherServer.trigger(`private-player-${playerId}`, 'game-created', gameRoom),
-        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gameRoom)
+        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gameRoom),
+        
+        // Send status updates to both players
+        pusherServer.trigger(`private-player-${playerId}`, 'status-update', { status: 'playing' }),
+        pusherServer.trigger(`private-player-${opponent}`, 'status-update', { status: 'playing' })
       ]);
       
-      console.log('Successfully sent all game-created events');
+      console.log('Successfully sent all game-created events and status updates');
     } catch (error) {
       console.error('Failed to notify players:', error);
       // Revert game state
