@@ -142,6 +142,10 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         console.log('Server confirmed waiting state');
         setIsSearching(true);
         setPlayerStatus('waiting');
+        toast.loading('Searching for opponent...', {
+          id: 'waiting-toast',
+          duration: Infinity
+        });
         // Show persistent toast while waiting
         toast.loading('Searching for opponent...', {
           id: 'waiting-toast',
