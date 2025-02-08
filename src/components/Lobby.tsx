@@ -13,6 +13,11 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [playerStatus, setPlayerStatus] = useState(player.status);
 
+  // Update status when player prop changes
+  useEffect(() => {
+    setPlayerStatus(player.status);
+  }, [player.status]);
+
   useEffect(() => {
     // Subscribe to lobby channel and private player channel
     const lobbyChannel = pusherClient.subscribe('presence-lobby') as any;
@@ -96,13 +101,15 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       if (data.error) {
         toast.error(data.error);
         setIsSearching(false);
+        setPlayerStatus('lobby');
       } else if (data.waiting) {
         console.log('Server confirmed waiting state');
         setIsSearching(true);
         setPlayerStatus('waiting');
-        toast.success('Waiting for opponent...', { 
-          duration: 5000,
-          id: 'waiting-toast'
+        // Show persistent toast while waiting
+        toast.loading('Searching for opponent...', {
+          id: 'waiting-toast',
+          duration: Infinity
         });
       } else if (data.id) {
         // If we get a game room back, use it
@@ -137,20 +144,19 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         <p>Status: {playerStatus}</p>
       </div>
 
-      {playerStatus === 'waiting' && (
-        <div className="text-center p-4 bg-yellow-50 rounded-lg mb-4">
-          <p className="text-yellow-600 font-medium">Actively searching for opponent...</p>
-          <p className="text-sm text-yellow-500 mt-1">Please wait</p>
+      {(isSearching || playerStatus === 'waiting') && (
+        <div className="text-center p-4 bg-blue-50 rounded-lg mb-4">
+          <div className="animate-pulse">
+            <p className="text-blue-600 font-medium">Searching for opponent...</p>
+            <p className="text-sm text-blue-500 mt-1">Please stay on this page</p>
+          </div>
+          <div className="mt-3">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          </div>
         </div>
       )}
 
       <div className="space-y-4">
-        {isSearching && (
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-blue-600 font-medium">Waiting for opponent...</p>
-            <p className="text-sm text-blue-500 mt-1">Stay on this page</p>
-          </div>
-        )}
         
         <button
           onClick={findMatch}

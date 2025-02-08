@@ -153,11 +153,21 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
     player.status = 'waiting';
     
     // Notify lobby that a player is waiting
-    await pusherServer.trigger('presence-lobby', 'player-waiting', {
-      playerId,
-      timestamp: Date.now(),
-      status: 'waiting'
-    });
+    try {
+      await Promise.all([
+        pusherServer.trigger('presence-lobby', 'player-waiting', {
+          playerId,
+          timestamp: Date.now(),
+          status: 'waiting'
+        }),
+        pusherServer.trigger(`private-player-${playerId}`, 'status-update', {
+          status: 'waiting'
+        })
+      ]);
+    } catch (error) {
+      console.error('Failed to send waiting status:', error);
+      return res.status(500).json({ error: 'Failed to update status' });
+    }
     
     res.status(200).json({ 
       waiting: true,
