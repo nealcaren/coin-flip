@@ -61,14 +61,15 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
       setFlipResult(data.result);
       
       // Update player coins and game state
-      player.coins = data.playerCoins;
-      setOpponentCoins(data.opponentCoins);
       setGameRoom((prevGameRoom) => ({
         ...prevGameRoom,
         status: data.gameStatus,
         currentTurn: data.nextTurn,
         betAmount: data.gameStatus === 'betting' ? 0 : prevGameRoom.betAmount,
       }));
+      
+      setPlayerCoins(data.playerCoins);
+      setOpponentCoins(data.opponentCoins);
       
       // Show result toast
       if (data.result === 'heads') {
