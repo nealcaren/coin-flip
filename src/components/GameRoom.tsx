@@ -151,23 +151,35 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       </div>
 
       {isMyTurn && gameRoom.status === 'betting' && (
-        <div className="mb-4">
-          <input
-            type="number"
-            min={1}
-            max={player.coins}
-            value={betAmount}
-            onChange={(e) => setBetAmount(Number(e.target.value))}
-            className="border p-2 mr-2"
-          />
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <div className="mb-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-600">Bet Amount:</span>
+              <span className="font-bold text-blue-600">{betAmount} coins</span>
+            </div>
+            <input
+              type="range"
+              min={1}
+              max={player.coins}
+              value={betAmount}
+              onChange={(e) => setBetAmount(Number(e.target.value))}
+              className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+            <div className="flex justify-between text-sm text-gray-500 mt-1">
+              <span>1</span>
+              <span>{player.coins}</span>
+            </div>
+          </div>
           <button
             onClick={handleBet}
             disabled={isPlacingBet}
-            className={`bg-blue-500 text-white px-4 py-2 rounded ${
-              isPlacingBet ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`w-full ${
+              isPlacingBet 
+                ? 'bg-gray-400' 
+                : 'bg-blue-500 hover:bg-blue-600'
+            } text-white py-3 rounded-lg font-semibold transition-colors`}
           >
-            {isPlacingBet ? 'Placing Bet...' : 'Place Bet'}
+            {isPlacingBet ? 'Placing Bet...' : `Bet ${betAmount} Coins`}
           </button>
         </div>
       )}
