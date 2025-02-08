@@ -5,12 +5,13 @@ import type { Player, GameRoom, FLIP_COOLDOWN } from '@/types/game';
 import { CoinFlip } from '@/components/CoinFlip';
 
 interface GameRoomProps {
-  gameRoom: GameRoom;
+  initialGameRoom: GameRoom;
   player: Player;
   onGameEnd?: () => void;
 }
 
-export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps) {
+export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoomProps) {
+  const [gameRoom, setGameRoom] = useState(initialGameRoom);
   const [betAmount, setBetAmount] = useState(1);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
@@ -40,8 +41,11 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       if (data.playerId !== player.id) {
         toast.info(`Opponent bet ${data.amount} coins`);
       }
-      gameRoom.status = 'flipping';
-      gameRoom.betAmount = data.amount;
+      setGameRoom((prevGameRoom) => ({
+        ...prevGameRoom,
+        status: 'flipping',
+        betAmount: data.amount,
+      }));
     });
 
     channel.bind('flip-result', (data: {
@@ -57,8 +61,12 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       // Update player coins and game state
       player.coins = data.playerCoins;
       setOpponentCoins(data.opponentCoins);
-      gameRoom.status = data.gameStatus;
-      gameRoom.currentTurn = data.nextTurn;
+      setGameRoom((prevGameRoom) => ({
+        ...prevGameRoom,
+        status: data.gameStatus,
+        currentTurn: data.nextTurn,
+        betAmount: data.gameStatus === 'betting' ? 0 : prevGameRoom.betAmount,
+      }));
       
       // Show result toast
       if (data.result === 'heads') {
@@ -76,10 +84,6 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
         // Clear flip result after animation
         setTimeout(() => {
           setFlipResult(undefined);
-          // Reset bet amount for next round if game continues
-          if (data.gameStatus === 'betting') {
-            gameRoom.betAmount = 0;
-          }
         }, 1500);
       }
     });
