@@ -34,8 +34,12 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
       console.error('Failed to subscribe to game channel:', error);
     });
     
-    channel.bind('bet-placed', (data: { amount: number }) => {
-      console.log('Bet placed:', data.amount);
+    channel.bind('bet-placed', (data: { amount: number, playerId: string }) => {
+      console.log('Bet placed:', data);
+      // Update game state for both players
+      if (data.playerId !== player.id) {
+        toast.info(`Opponent bet ${data.amount} coins`);
+      }
       gameRoom.status = 'flipping';
       gameRoom.betAmount = data.amount;
     });
@@ -232,11 +236,23 @@ export default function GameRoom({ gameRoom, player, onGameEnd }: GameRoomProps)
             </div>
           )}
 
-          {!isMyTurn && (
+          {!isMyTurn && gameRoom.status === 'betting' && (
             <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <p className="text-gray-500">Waiting for opponent...</p>
+              <p className="text-gray-500">Opponent is placing their bet...</p>
             </div>
           )}
+
+          {!isMyTurn && gameRoom.status === 'flipping' && (
+            <div className="text-center p-6 bg-gray-50 rounded-xl">
+              <p className="text-gray-500">Opponent's bet: {gameRoom.betAmount} coins</p>
+              <p className="text-gray-500 mt-2">Waiting for opponent to flip...</p>
+            </div>
+          )}
+
+          <div className="mt-4 text-sm text-gray-500 text-center">
+            <p>Game Status: {gameRoom.status}</p>
+            {gameRoom.betAmount > 0 && <p>Current Bet: {gameRoom.betAmount} coins</p>}
+          </div>
         </div>
       </div>
     </div>
