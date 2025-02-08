@@ -171,7 +171,7 @@ export default function Home() {
   if (gameState === 'playing' && currentGame && player) {
     return (
       <GameRoom 
-        gameRoom={currentGame}
+        initialGameRoom={currentGame}
         player={player}
         onGameEnd={() => {
           setGameState('lobby');
