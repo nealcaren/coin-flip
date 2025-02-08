@@ -42,7 +42,13 @@ export default function Home() {
         }
       });
 
-      // Add error handling for channel subscription
+      channel.bind('bet-placed', (data: { gameId: string, playerId: string, amount: number }) => {
+        console.log('Bet placed event received:', data);
+        if (currentGame && currentGame.id === data.gameId) {
+          setGameState('flipping');
+          toast.success('Bet placed! Coin flip in progress...');
+        }
+      });
       channel.bind('pusher:subscription_error', (error: any) => {
         console.error('Pusher subscription error:', error);
       });

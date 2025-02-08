@@ -92,7 +92,13 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
       console.log('Member removed from lobby:', member);
     });
 
-    // Bind all event handlers
+    playerChannel.bind('bet-placed', (data: { gameId: string, playerId: string, amount: number }) => {
+      console.log('Bet placed event received:', data);
+      if (currentGame && currentGame.id === data.gameId) {
+        setPlayerStatus('flipping');
+        toast.success('Bet placed! Coin flip in progress...');
+      }
+    });
     playerChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('game-created', handleGameCreated);
