@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { pusherClient } from '@/lib/pusher';
-import type { Player } from '@/types/game';
+import type { Player, GameRoom } from '@/types/game';
+import toast from 'react-hot-toast';
 
 interface LobbyProps {
   player: Player;
@@ -51,9 +52,14 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
         toast.error(data.error);
         setIsSearching(false);
       } else if (data.waiting) {
-        toast.success('Waiting for opponent...', { duration: 3000 });
-      } else {
+        // Keep searching state true and show toast
+        toast.success('Waiting for opponent...', { 
+          duration: 3000,
+          id: 'waiting-toast' // Prevent duplicate toasts
+        });
+      } else if (data.id) {
         // If we get a game room back, use it
+        console.log('Game room received:', data);
         onMatchFound(data);
       }
     } catch (error) {
