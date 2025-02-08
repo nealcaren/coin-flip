@@ -22,12 +22,12 @@ export default function Home() {
       });
 
       channel.bind('game-created', (game: GameRoom) => {
-        console.log('Game created event:', game);
+        console.log('Game created event received:', game);
         console.log('Current player:', player.id);
         console.log('Game players:', game.players);
         
         if (game.players.includes(player.id)) {
-          console.log('Match found for current player');
+          console.log('Match found, transitioning to game state');
           setCurrentGame(game);
           setGameState('playing');
         }
