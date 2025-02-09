@@ -302,7 +302,7 @@ async function handleFlip(req: NextApiRequest, res: NextApiResponse) {
 
   games.set(gameId, game);
   console.log('About to trigger flip-result event');
-  await pusherServer.trigger(`game-${gameId}`, 'flip-result', {
+  await pusherServer.trigger(`private-game-${gameId}`, 'flip-result', {
     result,
     playerCoins: player.coins,
     opponentCoins: opponent.coins,
