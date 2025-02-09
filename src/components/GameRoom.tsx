@@ -258,7 +258,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
             </div>
           </div>
 
-          {gameRoom.status === 'minbet' && (
+          {(gameRoom.status === 'minbet' || gameRoom.status === 'betting') && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex justify-between mb-2">
