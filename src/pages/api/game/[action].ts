@@ -153,11 +153,12 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       
       // Send to both the lobby channel and individual player channels
       await Promise.all([
-        // Send game creation events
+        // Send game creation event to lobby
         pusherServer.trigger('presence-lobby', 'game-created', gameRoom),
-        pusherServer.trigger(`private-player-${playerId}`, 'game-created', gameRoom),
-        pusherServer.trigger(`private-player-${opponent}`, 'game-created', gameRoom),
-        
+        // Send game start event to individual players
+        pusherServer.trigger(`private-player-${playerId}`, 'game-start', gameRoom),
+        pusherServer.trigger(`private-player-${opponent}`, 'game-start', gameRoom),
+          
         // Send status updates to both players
         pusherServer.trigger(`private-player-${playerId}`, 'status-update', { status: 'playing' }),
         pusherServer.trigger(`private-player-${opponent}`, 'status-update', { status: 'playing' })

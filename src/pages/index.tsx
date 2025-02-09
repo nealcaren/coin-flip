@@ -4,12 +4,14 @@ import type { Player, GameRoom } from '@/types/game';
 import { useHeartbeat } from '@/hooks/useHeartbeat';
 import GameRoom from '@/components/GameRoom';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/router';
 
 export default function Home() {
   const [studentId, setStudentId] = useState('');
   const [gameState, setGameState] = useState<'login' | 'lobby' | 'playing'>('login');
   const [player, setPlayer] = useState<Player | null>(null);
   const [currentGame, setCurrentGame] = useState<GameRoom | null>(null);
+  const router = useRouter();
 
   useHeartbeat(player?.id ?? null);
 
@@ -23,22 +25,15 @@ export default function Home() {
         console.log('New player joined:', data);
       });
 
-      channel.bind('game-created', (game: GameRoom) => {
-        console.log('Game created event received:', game);
-        console.log('Current player:', player.id);
-        console.log('Game players:', game.players);
-        
+      const privateChannel = pusherClient.subscribe(`private-player-${player.id}`);
+      privateChannel.bind('game-start', (game: GameRoom) => {
+        console.log('Game start event received:', game);
         if (game.players.includes(player.id)) {
           console.log('Match found, transitioning to game state');
           setCurrentGame(game);
-          if (game.status === 'flipping') {
-            setGameState('playing');
-            toast.success('Coin flip in progress!');
-          } else {
-            setGameState('waitingForBet');
-            toast.success('Waiting for opponent to place bet...');
-          }
-          setCurrentGame(game);
+          console.log('Current game state updated to:', game);
+          toast.success('Game started!');
+          router.push(`/game/${game.id}`);
         }
       });
 

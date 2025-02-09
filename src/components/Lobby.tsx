@@ -106,8 +106,6 @@ export default function Lobby({ player, onMatchFound }: LobbyProps) {
     });
     playerChannel.bind('status-update', handleStatusUpdate);
     lobbyChannel.bind('status-update', handleStatusUpdate);
-    lobbyChannel.bind('game-created', handleGameCreated);
-    playerChannel.bind('game-created', handleGameCreated);
     
     // Listen for waiting players
     lobbyChannel.bind('player-waiting', (data: { playerId: string, status: string }) => {
