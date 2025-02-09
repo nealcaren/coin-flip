@@ -22,6 +22,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [isFlipping, setIsFlipping] = useState(false);
   const [minBet, setMinBet] = useState(Math.ceil(player.coins / 2));
   const [submittedMinBet, setSubmittedMinBet] = useState(false);
+  const [opponentSubmitted, setOpponentSubmitted] = useState(false);
   const [countdown, setCountdown] = useState(20);
   const [playerCoins, setPlayerCoins] = useState<number>(player.coins);
   
@@ -52,6 +53,16 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
         betAmount: data.amount,
       }));
       console.log('Updated gameRoom state:', gameRoom);
+    });
+
+    channel.bind('minbet-placed', (data: { playerId: string, bet: number }) => {
+      if (data.playerId !== player.id) {
+        setOpponentSubmitted(true);
+        toast.info(`Opponent submitted min bet: ${data.bet} coins`);
+        if (submittedMinBet) {
+          simulateCoinFlip(minBet);
+        }
+      }
     });
 
     channel.bind('flip-result', (data: {
@@ -205,9 +216,11 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     setSubmittedMinBet(true);
     toast.success(`Minimum bet submitted: ${minBet} coins`);
     setGameRoom((prev) => ({ ...prev, betAmount: minBet, status: 'flipping' }));
-    setTimeout(() => {
+    if (opponentSubmitted) {
+      // Both players have submitted; flip immediately.
       simulateCoinFlip(minBet);
-    }, 1000);
+    }
+    // Else, wait for the opponent's submission or timeout (the timer in useEffect will auto-submit if needed)
   };
 
   const simulateCoinFlip = (finalBet: number) => {
