@@ -258,7 +258,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
             </div>
           </div>
 
-          {isMyTurn && (gameRoom.status === 'minbet' || gameRoom.status === 'betting') && (
+          {gameRoom.status === 'minbet' && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex justify-between mb-2">
@@ -275,7 +275,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
                   <span>1</span>
-                  <span>{player.coins}</span>
+                  <span>{playerCoins} coins</span>
                 </div>
                 <p className="text-center mt-2 text-sm text-gray-500">Time remaining: {countdown}s</p>
                 <div className="mt-4 text-center">
@@ -297,11 +297,6 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
             </div>
           )}
 
-          {!isMyTurn && (gameRoom.status === 'minbet' || gameRoom.status === 'betting') && (
-            <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <p className="text-gray-500">Waiting for opponent's minimum bet...</p>
-            </div>
-          )}
 
           {!isMyTurn && gameRoom.status === 'flipping' && (
             <div className="text-center p-6 bg-gray-50 rounded-xl">
