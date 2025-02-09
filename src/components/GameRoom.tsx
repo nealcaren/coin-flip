@@ -228,6 +228,8 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
       } else {
         setCountdown(5);
         setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
+        setSubmittedMinBet(false);
+        setMinBet(Math.ceil(newCoins / 2));
       }
       return newCoins;
     });
