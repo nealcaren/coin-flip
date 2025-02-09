@@ -22,7 +22,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [isFlipping, setIsFlipping] = useState(false);
   const [minBet, setMinBet] = useState(Math.ceil(player.coins / 2));
   const [submittedMinBet, setSubmittedMinBet] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(20);
   const [playerCoins, setPlayerCoins] = useState<number>(player.coins);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
@@ -226,7 +226,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
         toast.success('Game Over!');
         onGameEnd?.();
       } else {
-        setCountdown(5);
+        setCountdown(20);
         setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
         setSubmittedMinBet(false);
         setMinBet(Math.ceil(newCoins / 2));

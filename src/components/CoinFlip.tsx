@@ -15,7 +15,7 @@ export function CoinFlip({ result, onComplete }: CoinFlipProps) {
       const timer = setTimeout(() => {
         setIsFlipping(false);
         onComplete?.();
-      }, 1000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [result, onComplete]);
