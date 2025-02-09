@@ -212,11 +212,13 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   }, [gameRoom.status]);
 
   const handleMinBetSubmit = () => {
+    console.log('handleMinBetSubmit triggered, minBet:', minBet);
     if (submittedMinBet) return;
     setSubmittedMinBet(true);
     toast.success(`Minimum bet submitted: ${minBet} coins`);
     setGameRoom((prev) => ({ ...prev, betAmount: minBet }));
     if (opponentSubmitted) {
+      console.log('Both players have submitted, triggering coin flip with minBet:', minBet);
       // Both players have submitted; now transition to flipping and trigger coin flip.
       setGameRoom((prev) => ({ ...prev, status: 'flipping' }));
       simulateCoinFlip(minBet);
