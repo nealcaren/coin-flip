@@ -215,12 +215,13 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     if (submittedMinBet) return;
     setSubmittedMinBet(true);
     toast.success(`Minimum bet submitted: ${minBet} coins`);
-    setGameRoom((prev) => ({ ...prev, betAmount: minBet, status: 'flipping' }));
+    setGameRoom((prev) => ({ ...prev, betAmount: minBet }));
     if (opponentSubmitted) {
-      // Both players have submitted; flip immediately.
+      // Both players have submitted; now transition to flipping and trigger coin flip.
+      setGameRoom((prev) => ({ ...prev, status: 'flipping' }));
       simulateCoinFlip(minBet);
     }
-    // Else, wait for the opponent's submission or timeout (the timer in useEffect will auto-submit if needed)
+    // Otherwise, remain in 'minbet' until timeout (the useEffect timer auto-submits if needed) or opponent submits.
   };
 
   const simulateCoinFlip = (finalBet: number) => {
