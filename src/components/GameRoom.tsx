@@ -45,14 +45,14 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     channel.bind('bet-placed', (data: { amount: number, playerId: string }) => {
       console.log('bet-placed event received:', data);
       if (data.playerId !== player.id) {
-        toast.info(`Opponent bet ${data.amount} coins`);
+        toast.info(`Opponent submitted minimum bet of ${data.amount} coins`);
+        setOpponentSubmitted(true);
+        if (submittedMinBet) {
+          // Both submissions are in; trigger coin flip.
+          setGameRoom((prev) => ({ ...prev, status: 'flipping' }));
+          simulateCoinFlip(minBet);
+        }
       }
-      setGameRoom((prevGameRoom) => ({
-        ...prevGameRoom,
-        status: 'flipping',
-        betAmount: data.amount,
-      }));
-      console.log('Updated gameRoom state:', gameRoom);
     });
 
     channel.bind('minbet-placed', (data: { playerId: string, bet: number }) => {
