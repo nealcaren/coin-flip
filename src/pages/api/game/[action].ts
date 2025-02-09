@@ -296,7 +296,7 @@ async function handleFlip(req: NextApiRequest, res: NextApiResponse) {
     games.delete(gameId);
   } else {
     game.currentTurn = opponentId;
-    game.status = 'betting';
+    game.status = 'minbet';
     game.betAmount = 0;
   }
 
