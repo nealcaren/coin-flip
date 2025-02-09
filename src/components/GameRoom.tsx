@@ -118,7 +118,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   }, [gameRoom.id, onGameEnd]);
 
   const handleBet = async () => {
-    if (!isMyTurn || gameRoom.status !== 'betting' || isPlacingBet) {
+    if (!isMyTurn || (gameRoom.status !== 'betting' && gameRoom.status !== 'minbet') || isPlacingBet) {
       console.log('Bet blocked:', { isMyTurn, status: gameRoom.status, isPlacingBet });
       return;
     }
