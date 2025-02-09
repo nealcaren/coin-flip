@@ -22,6 +22,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [isFlipping, setIsFlipping] = useState(false);
   const [minBet, setMinBet] = useState(1);
   const [countdown, setCountdown] = useState(4);
+  const [playerCoins, setPlayerCoins] = useState<number>(player.coins);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
   console.log("isMyTurn:", isMyTurn);
@@ -215,20 +216,21 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     toast[result === 'heads' ? 'success' : 'error'](`Coin flip result: ${result.toUpperCase()}`);
     // Adjust coin amounts based on the outcome
     if (result === 'heads') {
-      player.coins += finalBet;
-      setOpponentCoins((prev) => Math.max(prev - finalBet, 0));
+      setOpponentCoins(prev => Math.max(prev - finalBet, 0));
     } else {
-      player.coins = Math.max(player.coins - finalBet, 0);
-      setOpponentCoins((prev) => prev + finalBet);
+      setOpponentCoins(prev => prev + finalBet);
     }
-    // End game if either player is bankrupt, otherwise start a new round
-    if (player.coins <= 0 || opponentCoins <= 0) {
-      toast.success('Game Over!');
-      onGameEnd?.();
-    } else {
-      setCountdown(4);
-      setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
-    }
+    setPlayerCoins(prevPlayerCoins => {
+      const newCoins = result === 'heads' ? prevPlayerCoins + finalBet : Math.max(prevPlayerCoins - finalBet, 0);
+      if (newCoins <= 0 || opponentCoins <= 0) {
+        toast.success('Game Over!');
+        onGameEnd?.();
+      } else {
+        setCountdown(4);
+        setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
+      }
+      return newCoins;
+    });
   };
 
   return (
@@ -241,7 +243,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-sm text-gray-500">You</p>
-                <p className="text-xl font-bold text-indigo-600">{player.coins} coins</p>
+                <p className="text-xl font-bold text-indigo-600">{playerCoins} coins</p>
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-sm text-gray-500">Opponent</p>
@@ -266,7 +268,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
                 <input
                   type="range"
                   min={1}
-                  max={player.coins}
+                  max={playerCoins}
                   value={minBet}
                   onChange={(e) => setMinBet(Number(e.target.value))}
                   className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
