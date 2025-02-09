@@ -20,6 +20,8 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [flipResult, setFlipResult] = useState<'heads' | 'tails' | undefined>();
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [minBet, setMinBet] = useState(1);
+  const [countdown, setCountdown] = useState(4);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
   console.log("isMyTurn:", isMyTurn);
@@ -180,6 +182,55 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
     }
   };
 
+  useEffect(() => {
+    if (gameRoom.status === 'minbet' && isMyTurn) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            handleMinBetSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [gameRoom.status, isMyTurn]);
+
+  const handleMinBetSubmit = () => {
+    // Simulate opponent’s minimum bet randomly
+    const opponentMinBet = Math.floor(Math.random() * player.coins) + 1;
+    const finalBet = Math.min(minBet, opponentMinBet);
+    toast.success(`Bet amount set to ${finalBet} coins`);
+    setGameRoom((prev) => ({ ...prev, betAmount: finalBet, status: 'flipping' }));
+    setTimeout(() => {
+      simulateCoinFlip(finalBet);
+    }, 1000);
+  };
+
+  const simulateCoinFlip = (finalBet: number) => {
+    const result = Math.random() < 0.5 ? 'heads' : 'tails';
+    setFlipResult(result);
+    toast[result === 'heads' ? 'success' : 'error'](`Coin flip result: ${result.toUpperCase()}`);
+    // Adjust coin amounts based on the outcome
+    if (result === 'heads') {
+      player.coins += finalBet;
+      setOpponentCoins((prev) => Math.max(prev - finalBet, 0));
+    } else {
+      player.coins = Math.max(player.coins - finalBet, 0);
+      setOpponentCoins((prev) => prev + finalBet);
+    }
+    // End game if either player is bankrupt, otherwise start a new round
+    if (player.coins <= 0 || opponentCoins <= 0) {
+      toast.success('Game Over!');
+      onGameEnd?.();
+    } else {
+      setCountdown(4);
+      setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
+    }
+  };
+
   return (
     <div className="game-container p-4">
       <div className="max-w-md mx-auto pt-8">
@@ -205,61 +256,40 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
             </div>
           </div>
 
-          {isMyTurn && gameRoom.status === 'betting' && (
+          {isMyTurn && gameRoom.status === 'minbet' && (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex justify-between mb-2">
-                  <span className="text-gray-600">Bet Amount</span>
-                  <span className="font-bold text-indigo-600">{betAmount} coins</span>
+                  <span className="text-gray-600">Set Minimum Bet</span>
+                  <span className="font-bold text-indigo-600">{minBet} coins</span>
                 </div>
                 <input
                   type="range"
                   min={1}
                   max={player.coins}
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(Number(e.target.value))}
+                  value={minBet}
+                  onChange={(e) => setMinBet(Number(e.target.value))}
                   className="w-full h-2 bg-indigo-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
                   <span>1</span>
                   <span>{player.coins}</span>
                 </div>
+                <p className="text-center mt-2 text-sm text-gray-500">Time remaining: {countdown}s</p>
               </div>
-              <button
-                onClick={handleBet}
-                disabled={isPlacingBet}
-                className={`button-primary ${isPlacingBet && 'opacity-50 cursor-not-allowed'}`}
-              >
-                {isPlacingBet ? 'Placing Bet...' : `Bet ${betAmount} Coins`}
-              </button>
             </div>
           )}
 
-          {isMyTurn && gameRoom.status === 'flipping' && (
+          {gameRoom.status === 'flipping' && (
             <div className="text-center space-y-4">
-              {flipResult && <CoinFlip result={flipResult} />}
-              <button
-                onClick={handleFlip}
-                disabled={isOnCooldown || flipResult !== undefined || isFlipping}
-                className={`button-secondary ${
-                  (isOnCooldown || flipResult !== undefined || isFlipping) && 
-                  'opacity-50 cursor-not-allowed'
-                }`}
-              >
-                {isOnCooldown 
-                  ? `Cooldown: ${Math.ceil(cooldownRemaining / 1000)}s`
-                  : isFlipping
-                  ? 'Flipping...'
-                  : flipResult
-                  ? `Result: ${flipResult.toUpperCase()}`
-                  : 'Flip Coin'}
-              </button>
+              <p className="mb-2">Bet Amount: {gameRoom.betAmount} coins</p>
+              <CoinFlip result={flipResult} />
             </div>
           )}
 
-          {!isMyTurn && gameRoom.status === 'betting' && (
+          {!isMyTurn && gameRoom.status === 'minbet' && (
             <div className="text-center p-6 bg-gray-50 rounded-xl">
-              <p className="text-gray-500">Opponent is placing their bet...</p>
+              <p className="text-gray-500">Waiting for opponent's minimum bet...</p>
             </div>
           )}
 
