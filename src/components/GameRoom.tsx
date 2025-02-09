@@ -226,7 +226,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
         toast.success('Game Over!');
         onGameEnd?.();
       } else {
-        setCountdown(4);
+        setCountdown(5);
         setGameRoom((prev) => ({ ...prev, status: 'minbet', betAmount: 0 }));
       }
       return newCoins;
