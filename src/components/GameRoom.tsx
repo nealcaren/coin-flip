@@ -65,7 +65,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
       // Update player coins and game state
       setGameRoom((prevGameRoom) => ({
         ...prevGameRoom,
-        status: data.gameStatus,
+        status: data.gameStatus === 'betting' ? 'minbet' : data.gameStatus,
         currentTurn: data.nextTurn,
         betAmount: data.gameStatus === 'betting' ? 0 : prevGameRoom.betAmount,
       }));
