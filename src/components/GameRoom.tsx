@@ -20,7 +20,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [flipResult, setFlipResult] = useState<'heads' | 'tails' | undefined>();
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
-  const [minBet, setMinBet] = useState(1);
+  const [minBet, setMinBet] = useState(Math.ceil(player.coins / 2));
   const [submittedMinBet, setSubmittedMinBet] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const [playerCoins, setPlayerCoins] = useState<number>(player.coins);

@@ -130,7 +130,7 @@ async function handleMatch(req: NextApiRequest, res: NextApiResponse) {
       players: [playerId, opponent],
       currentTurn: playerId,
       betAmount: 0,
-      status: 'betting',
+      status: 'minbet',
       lastAction: Date.now()
     };
 
