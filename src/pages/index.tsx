@@ -31,9 +31,8 @@ export default function Home() {
         if (game.players.includes(player.id)) {
           console.log('Match found, transitioning to game state');
           setCurrentGame(game);
-          console.log('Current game state updated to:', game);
+          setGameState('playing');
           toast.success('Game started!');
-          router.push(`/game/${game.id}`);
         }
       });
 
