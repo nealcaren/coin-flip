@@ -21,7 +21,8 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   const [isPlacingBet, setIsPlacingBet] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
   const [minBet, setMinBet] = useState(1);
-  const [countdown, setCountdown] = useState(4);
+  const [submittedMinBet, setSubmittedMinBet] = useState(false);
+  const [countdown, setCountdown] = useState(5);
   const [playerCoins, setPlayerCoins] = useState<number>(player.coins);
   
   const isMyTurn = gameRoom.currentTurn === player.id;
@@ -184,7 +185,7 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
   };
 
   useEffect(() => {
-    if (gameRoom.status === 'minbet' && isMyTurn) {
+    if (gameRoom.status === 'minbet') {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -197,16 +198,15 @@ export default function GameRoom({ initialGameRoom, player, onGameEnd }: GameRoo
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [gameRoom.status, isMyTurn]);
+  }, [gameRoom.status]);
 
   const handleMinBetSubmit = () => {
-    // Simulate opponent’s minimum bet randomly
-    const opponentMinBet = Math.floor(Math.random() * player.coins) + 1;
-    const finalBet = Math.min(minBet, opponentMinBet);
-    toast.success(`Bet amount set to ${finalBet} coins`);
-    setGameRoom((prev) => ({ ...prev, betAmount: finalBet, status: 'flipping' }));
+    if (submittedMinBet) return;
+    setSubmittedMinBet(true);
+    toast.success(`Minimum bet submitted: ${minBet} coins`);
+    setGameRoom((prev) => ({ ...prev, betAmount: minBet, status: 'flipping' }));
     setTimeout(() => {
-      simulateCoinFlip(finalBet);
+      simulateCoinFlip(minBet);
     }, 1000);
   };
 
